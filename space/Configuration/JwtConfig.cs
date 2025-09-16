@@ -21,13 +21,13 @@ public class JwtConfig
         _jwtSettings = jwtSettings.Value;
     }
 
-    public string GenerateToken(AppUser user)
+    public string GenerateToken(User user)
     {
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim("UserType", user.GetType().Name) 
+            new Claim("Role", user.Role)
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.Key));

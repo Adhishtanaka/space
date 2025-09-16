@@ -1,50 +1,31 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    private readonly JwtConfig _jwtConfig;
+    private readonly IAuthService _authService;
 
-    public AuthController(AppDbContext db, JwtConfig jwtConfig)
+    public AuthController(IAuthService authService)
     {
-        _db = db;
-        _jwtConfig = jwtConfig;
+        _authService = authService;
     }
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        if (await _db.AppUsers.AnyAsync(u => u.Email == request.Email))
-            return BadRequest(new { message = "Email already in use" });
-
-        var user = new User
-        {
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            Email = request.Email,
-            PhoneNumber = request.PhoneNumber,
-            DateOfBirth = request.DateOfBirth,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
-        };
-
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync();
-
-        var token = _jwtConfig.GenerateToken(user);
-        return Ok(new AuthResponse { Token = token });
+        var (success, error) = await _authService.RegisterAsync(request);
+        if (!success)
+            return BadRequest(new { message = error });
+        return Ok(new { message = "User registered successfully" });
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginRequest request)
     {
-        var user = await _db.AppUsers.FirstOrDefaultAsync(u => u.Email == request.Email);
-        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            return Unauthorized(new { message = "Invalid credentials" });
-
-        var token = _jwtConfig.GenerateToken(user);
-        return Ok(new AuthResponse { Token = token });
+        var (success, token, error) = await _authService.LoginAsync(request);
+        if (!success)
+            return Unauthorized(new { message = error });
+        return Ok(new AuthResponse { Token = token! });
     }
 }
