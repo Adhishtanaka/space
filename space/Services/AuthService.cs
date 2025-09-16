@@ -22,11 +22,14 @@ public class AuthService : IAuthService
         if (await _db.Users.AnyAsync(u => u.Email == request.Email))
             return (false, "Email already in use");
 
+        var role = request.Email.EndsWith("@Space.com") ? "Admin" : "User";
+
         var user = new User
         {
             FirstName = request.FirstName,
             LastName = request.LastName,
             Email = request.Email,
+            Role = role,
             PhoneNumber = request.PhoneNumber,
             DateOfBirth = request.DateOfBirth,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)

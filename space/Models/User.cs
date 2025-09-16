@@ -8,7 +8,7 @@ public class User
     public DateTime DateOfBirth { get; set; }
     public string PasswordHash { get; set; } = null!;
     public string Role { get; set; } = "User";
-    public ICollection<Post> Posts { get; set; } = new List<Post>();
+    public ICollection<Thread> Threads { get; set; } = new List<Thread>();
     public ICollection<Comment> Comments { get; set; } = new List<Comment>();
     public ICollection<Like> Likes { get; set; } = new List<Like>();
 }

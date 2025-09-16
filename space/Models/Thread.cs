@@ -1,4 +1,4 @@
-public class Post
+public class Thread
 {
     public int Id { get; set; }
     public string Content { get; set; } = null!;
