@@ -5,10 +5,16 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+builder.Services.AddControllers();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddSingleton<JwtConfig>();
 
 builder.Services.AddCors(options =>
 {
@@ -21,6 +27,9 @@ builder.Services.AddCors(options =>
     });
 });
 
+var jwtSection = builder.Configuration.GetSection("JwtSettings");
+var key = jwtSection.GetValue<string>("Key")!;
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -28,8 +37,6 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    var jwtSection = builder.Configuration.GetSection("JwtSettings");
-    var key = jwtSection.GetValue<string>("Key")!;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -48,19 +55,17 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-
 app.UseCors();
-
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/status", () =>
-{
-    return Results.Ok(new { status = "Service is running" });
-}).WithName("status");
+app.MapControllers();
+
+app.MapGet("/health", () => "API is running");
 
 app.Run();

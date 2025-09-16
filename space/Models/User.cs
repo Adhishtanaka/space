@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-
 public abstract class AppUser
 {
     public int Id { get; set; }
