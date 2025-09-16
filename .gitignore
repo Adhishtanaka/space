@@ -1,1 +1,56 @@
-appsettings.Development.json
+# Build results
+bin/
+obj/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+.vs/
+.github/
+
+# Rider
+.idea/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Entity Framework
+Migrations/
+
+# Publish results
+publish/
+
+# Configuration files
+appsettings.*.json
+!appsettings.json
+
+# Test results
+TestResults/
+
+# Others
+*.db
+*.sqlite
+*.pdb
+*.mdb
+*.bak
+*.cache
+*.swp
+*.tmp
+
+.vs/
+
+# Compiled DLLs
+*.dll
+
+# NuGet Packages
+*.nupkg
+packages/

@@ -30,6 +30,12 @@ public class AppDbContext : DbContext
             .HasForeignKey(l => l.CommentId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<Like>()
+            .HasOne(l => l.User)
+            .WithMany(u => u.Likes)
+            .HasForeignKey(l => l.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+
         base.OnModelCreating(modelBuilder);
     }
 }

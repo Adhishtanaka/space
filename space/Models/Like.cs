@@ -3,7 +3,7 @@ public class Like
     public int Id { get; set; }
 
     public int UserId { get; set; }
-    public AppUser User { get; set; } = null!;
+    public User User { get; set; } = null!; // Changed from AppUser to User
 
     public int? PostId { get; set; }
     public Post? Post { get; set; }
