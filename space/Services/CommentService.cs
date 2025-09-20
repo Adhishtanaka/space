@@ -1,11 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 
+using Microsoft.AspNetCore.SignalR;
+
 public class CommentService
 {
     private readonly AppDbContext _context;
-    public CommentService(AppDbContext context)
+    private readonly IHubContext<NotificationHub> _hubContext;
+    public CommentService(AppDbContext context, IHubContext<NotificationHub> hubContext)
     {
         _context = context;
+        _hubContext = hubContext;
     }
 
     public async Task<List<Comment>> GetAllCommentsAsync()
@@ -22,6 +26,7 @@ public class CommentService
     {
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
+        await TryNotifyClients();
         return comment;
     }
 
@@ -31,6 +36,7 @@ public class CommentService
         if (existing == null) return false;
         existing.Content = comment.Content;
         await _context.SaveChangesAsync();
+        await TryNotifyClients();
         return true;
     }
 
@@ -40,6 +46,15 @@ public class CommentService
         if (comment == null) return false;
         _context.Comments.Remove(comment);
         await _context.SaveChangesAsync();
+        await TryNotifyClients();
         return true;
+    }
+
+    private async Task TryNotifyClients()
+    {
+        if (NotificationThrottler.ShouldNotify())
+        {
+            await _hubContext.Clients.All.SendAsync("ShouldRefresh", true);
+        }
     }
 }

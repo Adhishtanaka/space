@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR;
 
 public class ThreadService
 {
     private readonly AppDbContext _context;
-    public ThreadService(AppDbContext context)
+    private readonly IHubContext<NotificationHub> _hubContext;
+    public ThreadService(AppDbContext context, IHubContext<NotificationHub> hubContext)
     {
         _context = context;
+        _hubContext = hubContext;
     }
 
     public async Task<List<Thread>> GetAllThreadsAsync()
@@ -22,6 +25,7 @@ public class ThreadService
     {
         _context.Threads.Add(thread);
         await _context.SaveChangesAsync();
+        await TryNotifyClients();
         return thread;
     }
 
@@ -32,6 +36,7 @@ public class ThreadService
         existing.Title = thread.Title;
         existing.Description = thread.Description;
         await _context.SaveChangesAsync();
+        await TryNotifyClients();
         return true;
     }
 
@@ -41,6 +46,15 @@ public class ThreadService
         if (thread == null) return false;
         _context.Threads.Remove(thread);
         await _context.SaveChangesAsync();
+        await TryNotifyClients();
         return true;
+    }
+
+    private async Task TryNotifyClients()
+    {
+        if (NotificationThrottler.ShouldNotify())
+        {
+            await _hubContext.Clients.All.SendAsync("ShouldRefresh", true);
+        }
     }
 }

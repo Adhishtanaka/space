@@ -70,7 +70,9 @@ app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 
+
 app.MapControllers();
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.MapGet("/health", () => "API is running");
 
