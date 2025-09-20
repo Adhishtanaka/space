@@ -6,6 +6,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.AddSignalR();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -17,6 +18,9 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 
 builder.Services.AddSingleton<JwtConfig>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ThreadService>();
+builder.Services.AddScoped<CommentService>();
+builder.Services.AddScoped<LikeService>();
 
 builder.Services.AddCors(options =>
 {

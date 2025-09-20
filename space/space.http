@@ -1,6 +1,4 @@
 @space_HostAddress = http://localhost:5106
 
-GET {{space_HostAddress}}/weatherforecast/
+GET {{space_HostAddress}}/health
 Accept: application/json
-
-###
