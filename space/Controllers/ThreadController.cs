@@ -17,16 +17,16 @@ public class ThreadController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var threads = await _threadService.GetAllThreadsAsync();
-        return Ok(threads);
+        var result = await _threadService.GetAllThreadsWithUserContextAsync(User);
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
-        var thread = await _threadService.GetThreadByIdAsync(id);
-        if (thread == null) return NotFound();
-        return Ok(thread);
+        var result = await _threadService.GetThreadWithUserContextAsync(id, User);
+        if (result == null) return NotFound();
+        return Ok(result);
     }
 
     [HttpPost]

@@ -1,11 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-public interface IAuthService
-{
-    Task<(bool Success, User? User, string? ErrorMessage)> GetProfileAsync(int userId);
-    Task<(bool Success, string? ErrorMessage)> RegisterAsync(RegisterRequest request);
-    Task<(bool Success, string? Token, string? ErrorMessage)> LoginAsync(LoginRequest request);
-}
+using System.Security.Claims;
 
 public class AuthService : IAuthService
 {
@@ -18,8 +13,15 @@ public class AuthService : IAuthService
         _jwtConfig = jwtConfig;
     }
 
-    public async Task<(bool Success, User? User, string? ErrorMessage)> GetProfileAsync(int userId)
+    public async Task<(bool Success, User? User, string? ErrorMessage)> GetProfileAsync(ClaimsPrincipal userPrincipal)
     {
+        var userIdClaim = userPrincipal.Claims.FirstOrDefault(c => c.Type == "id" || c.Type.EndsWith("/nameidentifier"));
+        if (userIdClaim == null)
+            return (false, null, "Unauthorized");
+
+        if (!int.TryParse(userIdClaim.Value, out int userId))
+            return (false, null, "Unauthorized");
+
         var user = await _db.Users.FindAsync(userId);
         if (user == null)
             return (false, null, "User not found");

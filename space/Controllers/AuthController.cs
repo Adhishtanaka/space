@@ -35,16 +35,13 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Profile()
     {
-        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "id" || c.Type.EndsWith("/nameidentifier"));
-        if (userIdClaim == null)
-            return Unauthorized();
-
-        if (!int.TryParse(userIdClaim.Value, out int userId))
-            return Unauthorized();
-
-        var (success, user, error) = await _authService.GetProfileAsync(userId);
+        var (success, user, error) = await _authService.GetProfileAsync(User);
         if (!success || user == null)
+        {
+            if (error == "Unauthorized")
+                return Unauthorized();
             return NotFound(new { message = error ?? "User not found" });
+        }
 
         return Ok(new
         {

@@ -20,7 +20,6 @@ builder.Services.AddSingleton<JwtConfig>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ThreadService>();
 builder.Services.AddScoped<CommentService>();
-builder.Services.AddScoped<LikeService>();
 
 builder.Services.AddCors(options =>
 {

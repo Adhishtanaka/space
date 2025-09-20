@@ -15,16 +15,16 @@ public class CommentController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var comments = await _commentService.GetAllCommentsAsync();
-        return Ok(comments);
+        var result = await _commentService.GetAllCommentsWithUserContextAsync(User);
+        return Ok(result);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
-        var comment = await _commentService.GetCommentByIdAsync(id);
-        if (comment == null) return NotFound();
-        return Ok(comment);
+        var result = await _commentService.GetCommentWithUserContextAsync(id, User);
+        if (result == null) return NotFound();
+        return Ok(result);
     }
 
     [HttpPost]

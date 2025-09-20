@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 public class RegisterRequest
 {
     public string FirstName { get; set; } = null!;
@@ -17,4 +19,11 @@ public class LoginRequest
 public class AuthResponse
 {
     public string Token { get; set; } = null!;
+}
+
+public interface IAuthService
+{
+    Task<(bool Success, User? User, string? ErrorMessage)> GetProfileAsync(ClaimsPrincipal userPrincipal);
+    Task<(bool Success, string? ErrorMessage)> RegisterAsync(RegisterRequest request);
+    Task<(bool Success, string? Token, string? ErrorMessage)> LoginAsync(LoginRequest request);
 }

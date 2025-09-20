@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
+using System.Security.Claims;
 
 public class ThreadService
 {
@@ -48,6 +49,69 @@ public class ThreadService
         await _context.SaveChangesAsync();
         await TryNotifyClients();
         return true;
+    }
+
+    public async Task<object> GetAllThreadsWithUserContextAsync(ClaimsPrincipal user)
+    {
+        var threads = await GetAllThreadsAsync();
+        var userId = GetUserIdFromClaims(user);
+
+        return threads.Select(t => new
+        {
+            t.Id,
+            t.Title,
+            t.Description,
+            t.CreatedAt,
+            t.UserId,
+            t.User,
+            LikeCount = t.Likes?.Count ?? 0,
+            LikedByCurrentUser = userId.HasValue && (t.Likes?.Any(l => l.UserId == userId.Value) ?? false),
+            CommentCount = t.Comments?.Count ?? 0
+        });
+    }
+
+    public async Task<object?> GetThreadWithUserContextAsync(int id, ClaimsPrincipal user)
+    {
+        var thread = await GetThreadByIdAsync(id);
+        if (thread == null) return null;
+
+        var userId = GetUserIdFromClaims(user);
+
+        return new
+        {
+            thread.Id,
+            thread.Title,
+            thread.Description,
+            thread.CreatedAt,
+            thread.UserId,
+            thread.User,
+            LikeCount = thread.Likes?.Count ?? 0,
+            LikedByCurrentUser = userId.HasValue && (thread.Likes?.Any(l => l.UserId == userId.Value) ?? false),
+            CommentCount = thread.Comments?.Count ?? 0,
+            Comments = thread.Comments?.Select(c => new
+            {
+                c.Id,
+                c.Content,
+                c.CreatedAt,
+                c.UserId,
+                c.User,
+                LikeCount = c.Likes?.Count ?? 0,
+                LikedByCurrentUser = userId.HasValue && (c.Likes?.Any(l => l.UserId == userId.Value) ?? false),
+                c.ParentCommentId,
+                c.Replies
+            })
+        };
+    }
+
+    private int? GetUserIdFromClaims(ClaimsPrincipal user)
+    {
+        if (user.Identity?.IsAuthenticated != true) return null;
+
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "id" || c.Type.EndsWith("/nameidentifier"));
+        if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int uid))
+            return uid;
+
+        return null;
     }
 
     private async Task TryNotifyClients()
