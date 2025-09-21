@@ -3,38 +3,56 @@ using Microsoft.EntityFrameworkCore;
 public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-
     public DbSet<User> Users { get; set; } = null!;
-    public DbSet<Thread> Threads { get; set; } = null!;
-    public DbSet<Comment> Comments { get; set; } = null!;
-    public DbSet<Like> Likes { get; set; } = null!;
+    public DbSet<Post> Posts { get; set; } = null!;
+    public DbSet<Vote> Votes { get; set; } = null!;
+    public DbSet<UserFollow> UserFollows { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Like>()
-            .HasOne(l => l.Thread)
-            .WithMany(t => t.Likes)
-            .HasForeignKey(l => l.ThreadId)
+        base.OnModelCreating(modelBuilder);
+
+        // Configure Post relationships
+        modelBuilder.Entity<Post>()
+            .HasOne(p => p.User)
+            .WithMany(u => u.Posts)
+            .HasForeignKey(p => p.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<Like>()
-            .HasOne(l => l.Comment)
-            .WithMany(c => c.Likes)
-            .HasForeignKey(l => l.CommentId)
+        // Configure Vote relationships
+        modelBuilder.Entity<Vote>()
+            .HasOne(v => v.User)
+            .WithMany(u => u.Votes)
+            .HasForeignKey(v => v.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<Like>()
-            .HasOne(l => l.User)
-            .WithMany(u => u.Likes)
-            .HasForeignKey(l => l.UserId)
+        modelBuilder.Entity<Vote>()
+            .HasOne(v => v.Post)
+            .WithMany(p => p.Votes)
+            .HasForeignKey(v => v.PostId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<Comment>()
-            .HasOne(c => c.ParentComment)
-            .WithMany(c => c.Replies)
-            .HasForeignKey(c => c.ParentCommentId)
+        // Configure UserFollow relationships
+        modelBuilder.Entity<UserFollow>()
+            .HasOne(uf => uf.Follower)
+            .WithMany(u => u.Following)
+            .HasForeignKey(uf => uf.FollowerId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<UserFollow>()
+            .HasOne(uf => uf.Followed)
+            .WithMany(u => u.Followers)
+            .HasForeignKey(uf => uf.FollowedId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Ensure one vote per user per post
+        modelBuilder.Entity<Vote>()
+            .HasIndex(v => new { v.UserId, v.PostId })
+            .IsUnique();
+
+        // Ensure one follow relationship per pair
+        modelBuilder.Entity<UserFollow>()
+            .HasIndex(uf => new { uf.FollowerId, uf.FollowedId })
+            .IsUnique();
     }
 }

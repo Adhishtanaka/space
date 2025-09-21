@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
-
     public AuthController(IAuthService authService)
     {
         _authService = authService;
@@ -30,28 +29,25 @@ public class AuthController : ControllerBase
         return Ok(new AuthResponse { Token = token! });
     }
 
-
-    [HttpGet("Profile")]
-    [Authorize]
-    public async Task<IActionResult> Profile()
+    [HttpGet("user/{email}")]
+    public async Task<IActionResult> GetUserById(string email)
     {
-        var (success, user, error) = await _authService.GetProfileAsync(User);
-        if (!success || user == null)
+        var (success, userDetails, error) = await _authService.GetUserByEmailAsync(email);
+        if (!success || userDetails == null)
         {
-            if (error == "Unauthorized")
-                return Unauthorized();
             return NotFound(new { message = error ?? "User not found" });
         }
+        return Ok(userDetails);
+    }
 
-        return Ok(new
+    [HttpGet("users")]
+    public async Task<IActionResult> GetAllUsers()
+    {
+        var (success, users, error) = await _authService.GetAllUsersAsync();
+        if (!success)
         {
-            user.Id,
-            user.FirstName,
-            user.LastName,
-            user.Email,
-            user.PhoneNumber,
-            user.DateOfBirth,
-            user.Role
-        });
+            return BadRequest(new { message = error ?? "Failed to retrieve users" });
+        }
+        return Ok(users);
     }
 }

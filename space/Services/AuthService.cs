@@ -13,34 +13,16 @@ public class AuthService : IAuthService
         _jwtConfig = jwtConfig;
     }
 
-    public async Task<(bool Success, User? User, string? ErrorMessage)> GetProfileAsync(ClaimsPrincipal userPrincipal)
-    {
-        var userIdClaim = userPrincipal.Claims.FirstOrDefault(c => c.Type == "id" || c.Type.EndsWith("/nameidentifier"));
-        if (userIdClaim == null)
-            return (false, null, "Unauthorized");
-
-        if (!int.TryParse(userIdClaim.Value, out int userId))
-            return (false, null, "Unauthorized");
-
-        var user = await _db.Users.FindAsync(userId);
-        if (user == null)
-            return (false, null, "User not found");
-        return (true, user, null);
-    }
-
     public async Task<(bool Success, string? ErrorMessage)> RegisterAsync(RegisterRequest request)
     {
         if (await _db.Users.AnyAsync(u => u.Email == request.Email))
             return (false, "Email already in use");
-
-        var role = request.Email.EndsWith("@Space.com") ? "Admin" : "User";
 
         var user = new User
         {
             FirstName = request.FirstName,
             LastName = request.LastName,
             Email = request.Email,
-            Role = role,
             PhoneNumber = request.PhoneNumber,
             DateOfBirth = request.DateOfBirth,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
@@ -59,5 +41,39 @@ public class AuthService : IAuthService
 
         var token = _jwtConfig.GenerateToken(user);
         return (true, token, null);
+    }
+
+    public async Task<(bool Success, UserDto? UserDetails, string? ErrorMessage)> GetUserByEmailAsync(string email)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        if (user == null)
+            return (false, null, "User not found");
+
+        var userDto = new UserDto
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            DateOfBirth = user.DateOfBirth,
+        };
+
+        return (true, userDto, null);
+    }
+
+    public async Task<(bool Success, List<UserDto> Users, string? ErrorMessage)> GetAllUsersAsync()
+    {
+        var users = await _db.Users.ToListAsync();
+        var userDtos = users.Select(user => new UserDto
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            DateOfBirth = user.DateOfBirth,
+        }).ToList();
+        return (true, userDtos, null);
     }
 }

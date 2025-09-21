@@ -7,8 +7,10 @@ public class User
     public string? PhoneNumber { get; set; }
     public DateTime DateOfBirth { get; set; }
     public string PasswordHash { get; set; } = null!;
-    public string Role { get; set; } = "User";
-    public ICollection<Thread> Threads { get; set; } = new List<Thread>();
-    public ICollection<Comment> Comments { get; set; } = new List<Comment>();
-    public ICollection<Like> Likes { get; set; } = new List<Like>();
+
+    // Navigation properties
+    public ICollection<Post> Posts { get; set; } = new List<Post>();
+    public ICollection<Vote> Votes { get; set; } = new List<Vote>();
+    public ICollection<UserFollow> Following { get; set; } = new List<UserFollow>();
+    public ICollection<UserFollow> Followers { get; set; } = new List<UserFollow>();
 }

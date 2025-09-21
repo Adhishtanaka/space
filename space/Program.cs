@@ -18,8 +18,8 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 
 builder.Services.AddSingleton<JwtConfig>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<ThreadService>();
-builder.Services.AddScoped<CommentService>();
+builder.Services.AddScoped<IPostService, PostService>();
+builder.Services.AddScoped<IFollowService, FollowService>();
 
 builder.Services.AddCors(options =>
 {
@@ -29,6 +29,15 @@ builder.Services.AddCors(options =>
             .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod();
+    });
+
+    options.AddPolicy("SignalRPolicy", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:3000", "https://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -52,6 +61,21 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSection.GetValue<string>("Audience")!,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
     };
+
+    // Configure JWT for SignalR
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 builder.Services.AddAuthorization();
@@ -71,7 +95,7 @@ app.UseAuthorization();
 
 
 app.MapControllers();
-app.MapHub<NotificationHub>("/notificationHub");
+app.MapHub<NotificationHub>("/notificationHub").RequireCors("SignalRPolicy");
 
 app.MapGet("/health", () => "API is running");
 
