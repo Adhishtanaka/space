@@ -46,4 +46,6 @@ public interface IFollowService
     Task<(bool Success, List<UserFollowDto> Users, string? ErrorMessage)> GetFollowersAsync(int userId);
     Task<(bool Success, List<UserFollowDto> Users, string? ErrorMessage)> GetFollowingAsync(int userId);
     Task<(bool Success, List<UserFollowDto> Users, string? ErrorMessage)> GetSuggestedUsersAsync(int userId);
+
+    Task<bool> IsFollowingAsync(int followerId, int followedId);
 }

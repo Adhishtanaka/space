@@ -29,10 +29,10 @@ public class AuthController : ControllerBase
         return Ok(new AuthResponse { Token = token! });
     }
 
-    [HttpGet("user/{email}")]
-    public async Task<IActionResult> GetUserById(string email)
+    [HttpGet("user/{id}")]
+    public async Task<IActionResult> GetUserById(int id)
     {
-        var (success, userDetails, error) = await _authService.GetUserByEmailAsync(email);
+        var (success, userDetails, error) = await _authService.GetUserByIdAsync(id);
         if (!success || userDetails == null)
         {
             return NotFound(new { message = error ?? "User not found" });

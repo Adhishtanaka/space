@@ -37,5 +37,6 @@ public interface IAuthService
     Task<(bool Success, string? ErrorMessage)> RegisterAsync(RegisterRequest request);
     Task<(bool Success, string? Token, string? ErrorMessage)> LoginAsync(LoginRequest request);
     Task<(bool Success, UserDto? UserDetails, string? ErrorMessage)> GetUserByEmailAsync(string email);
+    Task<(bool Success, UserDto? UserDetails, string? ErrorMessage)> GetUserByIdAsync(int userId);
     Task<(bool Success, List<UserDto> Users, string? ErrorMessage)> GetAllUsersAsync();
 }

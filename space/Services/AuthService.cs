@@ -62,6 +62,25 @@ public class AuthService : IAuthService
         return (true, userDto, null);
     }
 
+    public async Task<(bool Success, UserDto? UserDetails, string? ErrorMessage)> GetUserByIdAsync(int userId)
+    {
+        var user = await _db.Users.FindAsync(userId);
+        if (user == null)
+            return (false, null, "User not found");
+
+        var userDto = new UserDto
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
+            DateOfBirth = user.DateOfBirth,
+        };
+
+        return (true, userDto, null);
+    }
+
     public async Task<(bool Success, List<UserDto> Users, string? ErrorMessage)> GetAllUsersAsync()
     {
         var users = await _db.Users.ToListAsync();

@@ -154,4 +154,9 @@ public class FollowService : IFollowService
 
         return (true, suggestedUserDtos, null);
     }
+
+    public async Task<bool> IsFollowingAsync(int followerId, int followedId)
+{
+    return await _db.UserFollows.AnyAsync(uf => uf.FollowerId == followerId && uf.FollowedId == followedId);
+}
 }

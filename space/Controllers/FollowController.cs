@@ -104,6 +104,17 @@ public class FollowController : ControllerBase
         return Ok(following);
     }
 
+    [HttpGet("is-following/{userId}")]
+    public async Task<IActionResult> IsFollowing(int userId)
+    {
+        var currentUserId = GetCurrentUserId();
+        if (currentUserId == null)
+            return Unauthorized();
+
+        var isFollowing = await _followService.IsFollowingAsync(currentUserId.Value, userId);
+        return Ok(new { isFollowing });
+    }
+
     private int? GetCurrentUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
