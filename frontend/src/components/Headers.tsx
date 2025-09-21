@@ -1,11 +1,14 @@
 import { Link, useLocation, useNavigate } from "react-router";
 import { useAuth } from "../lib/useAuth";
+import { useTheme } from "../lib/useTheme";
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import {
   UserIcon,
   ArrowRightStartOnRectangleIcon,
   HomeIcon,
+  MoonIcon,
+  SunIcon,
 } from "@heroicons/react/24/outline";
 
 function classNames(...classes: (string | false | undefined)[]) {
@@ -14,28 +17,45 @@ function classNames(...classes: (string | false | undefined)[]) {
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-gray-200 bg-white/80 backdrop-blur">
-      <div className="mx-auto max-w-3xl px-4 py-3 flex items-center justify-between">
+    <header className={classNames(
+      "sticky top-0 z-50 border-b backdrop-blur-lg transition-colors duration-200",
+      isDark 
+        ? "border-gray-800 bg-black/90" 
+        : "border-gray-200 bg-white/90"
+    )}>
+      <div className="mx-auto max-w-4xl px-6 py-4 flex items-center justify-between">
+        {/* Logo */}
         <Link
           to={user ? "/feed" : "/"}
-          className="flex items-center gap-2 font-semibold"
+          className="flex items-center gap-3 font-bold text-lg group"
         >
-          <div className="h-7 w-7 rounded bg-[#5296dd] text-white grid place-items-center font-bold">
+          <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#5296dd] to-[#92bddf] text-white grid place-items-center font-bold text-lg shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
             S
           </div>
-          <span className="tracking-tight">Space</span>
+          <span className={classNames(
+            "tracking-tight transition-colors duration-200",
+            isDark ? "text-white" : "text-gray-900"
+          )}>
+            Space
+          </span>
         </Link>
 
-        <nav className="flex items-center gap-3 text-sm">
+        {/* Navigation */}
+        <nav className="flex items-center gap-1 text-sm">
           <Link
             to="/feed"
             className={classNames(
-              "px-2 py-1 rounded hover:bg-[#92bddf]/10",
-              location.pathname === "/feed" && "text-[#5296dd] font-medium",
+              "px-4 py-2 rounded-lg transition-all duration-200 font-medium",
+              location.pathname === "/feed" 
+                ? "text-[#5296dd] bg-[#5296dd]/10" 
+                : isDark 
+                  ? "text-gray-300 hover:text-white hover:bg-gray-800" 
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
             )}
           >
             Feed
@@ -44,9 +64,12 @@ export default function Header() {
             <Link
               to={`/profile/${user.id}`}
               className={classNames(
-                "px-2 py-1 rounded hover:bg-[#92bddf]/10",
-                location.pathname?.startsWith("/profile") &&
-                  "text-[#5296dd] font-medium",
+                "px-4 py-2 rounded-lg transition-all duration-200 font-medium",
+                location.pathname?.startsWith("/profile") 
+                  ? "text-[#5296dd] bg-[#5296dd]/10" 
+                  : isDark 
+                    ? "text-gray-300 hover:text-white hover:bg-gray-800" 
+                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               )}
             >
               Profile
@@ -54,50 +77,90 @@ export default function Header() {
           )}
         </nav>
 
-        <div className="flex items-center gap-2">
+        {/* Actions */}
+        <div className="flex items-center gap-3">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className={classNames(
+              "p-2 rounded-lg transition-all duration-200",
+              isDark 
+                ? "text-gray-300 hover:text-white hover:bg-gray-800" 
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            )}
+          >
+            {isDark ? (
+              <SunIcon className="size-5" />
+            ) : (
+              <MoonIcon className="size-5" />
+            )}
+          </button>
+
           {!user ? (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <Link
                 to="/login"
-                className="px-3 py-1.5 rounded border border-gray-300 hover:bg-[#92bddf]/10"
+                className={classNames(
+                  "px-4 py-2 rounded-lg border transition-all duration-200 font-medium",
+                  isDark 
+                    ? "border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600" 
+                    : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
+                )}
               >
                 Log in
               </Link>
               <Link
                 to="/register"
-                className="px-3 py-1.5 rounded bg-[#5296dd] text-white hover:bg-[#5296dd]/90"
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-[#5296dd] to-[#92bddf] text-white font-medium hover:shadow-lg hover:scale-105 transition-all duration-200"
               >
                 Sign up
               </Link>
             </div>
           ) : (
-            <Menu as="div" className="relative inline-block text-left">
-              <Menu.Button className="flex items-center gap-2 rounded px-2 py-1.5 hover:bg-[#92bddf]/10">
-                <div className="size-7 rounded-full bg-[#5296dd] text-white grid place-items-center">
-                  {user.firstName?.[0] || <UserIcon className="size-5" />}
+            <Menu as="div" className="relative">
+              <Menu.Button className={classNames(
+                "flex items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200",
+                isDark 
+                  ? "hover:bg-gray-800" 
+                  : "hover:bg-gray-100"
+              )}>
+                <div className="size-8 rounded-full bg-gradient-to-br from-[#5296dd] to-[#92bddf] text-white grid place-items-center font-medium text-sm">
+                  {user.firstName?.[0] || <UserIcon className="size-4" />}
                 </div>
-                <span className="hidden sm:block text-sm">
+                <span className={classNames(
+                  "hidden sm:block text-sm font-medium transition-colors duration-200",
+                  isDark ? "text-gray-300" : "text-gray-700"
+                )}>
                   {user.firstName}
                 </span>
               </Menu.Button>
               <Transition
                 as={Fragment}
-                enter="transition ease-out duration-100"
+                enter="transition ease-out duration-200"
                 enterFrom="transform opacity-0 scale-95"
                 enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
+                leave="transition ease-in duration-150"
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="absolute right-0 mt-2 w-44 origin-top-right rounded border border-gray-200 bg-white shadow-lg focus:outline-none">
-                  <div className="p-1">
+                <Menu.Items className={classNames(
+                  "absolute right-0 mt-2 w-48 origin-top-right rounded-xl border shadow-xl focus:outline-none",
+                  isDark 
+                    ? "border-gray-800 bg-gray-900" 
+                    : "border-gray-200 bg-white"
+                )}>
+                  <div className="p-2">
                     <Menu.Item>
                       {({ active }) => (
                         <button
                           onClick={() => navigate(`/profile/${user.id}`)}
                           className={classNames(
-                            "w-full flex items-center gap-2 px-2 py-1.5 rounded text-left",
-                            active && "bg-[#92bddf]/10 text-[#5296dd]",
+                            "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all duration-150",
+                            active 
+                              ? "bg-[#5296dd]/10 text-[#5296dd]" 
+                              : isDark 
+                                ? "text-gray-300 hover:bg-gray-800" 
+                                : "text-gray-700 hover:bg-gray-100"
                           )}
                         >
                           <UserIcon className="size-4" />
@@ -110,8 +173,12 @@ export default function Header() {
                         <button
                           onClick={() => navigate("/feed")}
                           className={classNames(
-                            "w-full flex items-center gap-2 px-2 py-1.5 rounded text-left",
-                            active && "bg-[#92bddf]/10 text-[#5296dd]",
+                            "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all duration-150",
+                            active 
+                              ? "bg-[#5296dd]/10 text-[#5296dd]" 
+                              : isDark 
+                                ? "text-gray-300 hover:bg-gray-800" 
+                                : "text-gray-700 hover:bg-gray-100"
                           )}
                         >
                           <HomeIcon className="size-4" />
@@ -119,14 +186,17 @@ export default function Header() {
                         </button>
                       )}
                     </Menu.Item>
-                    <div className="my-1 border-t border-gray-200" />
+                    <div className={classNames(
+                      "my-2 border-t",
+                      isDark ? "border-gray-800" : "border-gray-200"
+                    )} />
                     <Menu.Item>
                       {({ active }) => (
                         <button
                           onClick={logout}
                           className={classNames(
-                            "w-full flex items-center gap-2 px-2 py-1.5 rounded text-red-600 text-left",
-                            active && "bg-red-50",
+                            "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-500 text-left transition-all duration-150",
+                            active && "bg-red-50 dark:bg-red-900/20"
                           )}
                         >
                           <ArrowRightStartOnRectangleIcon className="size-4" />

@@ -1,16 +1,26 @@
-
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router";
 import { useAuth } from "../lib/useAuth";
+import { useTheme } from "../lib/useTheme";
 import { api } from "../lib/api";
 import type { Post, FollowUser, User } from "../lib/types";
-import { UserPlusIcon, UserMinusIcon } from "@heroicons/react/24/outline";
+import {
+    UserPlusIcon,
+    UserMinusIcon,
+    HandThumbUpIcon,
+    HandThumbDownIcon,
+    UserIcon,
+} from "@heroicons/react/24/outline";
 
+function classNames(...classes: (string | false | undefined)[]) {
+    return classes.filter(Boolean).join(" ");
+}
 
 export default function Profile() {
     const { id } = useParams<{ id: string }>();
     const userId = Number(id);
     const { token, user, loading } = useAuth();
+    const { isDark } = useTheme();
     const navigate = useNavigate();
 
     const [posts, setPosts] = useState<Post[]>([]);
@@ -18,6 +28,7 @@ export default function Profile() {
     const [following, setFollowing] = useState<FollowUser[]>([]);
     const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
     const [userDetails, setUserDetails] = useState<User | null>(null);
+    const [followLoading, setFollowLoading] = useState(false);
 
     const isOwn = useMemo(() => user?.id === userId, [user?.id, userId]);
 
@@ -29,7 +40,7 @@ export default function Profile() {
         async function load() {
             if (!token) return;
             try {
-                const [p, f1, f2 ,f3] = await Promise.all([
+                const [p, f1, f2, f3] = await Promise.all([
                     api.getUserPosts(userId, token),
                     api.userFollowers(userId, token),
                     api.userFollowing(userId, token),
@@ -49,7 +60,8 @@ export default function Profile() {
     }, [token, userId, user]);
 
     async function toggleFollow() {
-        if (!token) return;
+        if (!token || followLoading) return;
+        setFollowLoading(true);
         try {
             if (isFollowing) {
                 await api.unfollow(userId, token);
@@ -58,7 +70,7 @@ export default function Profile() {
                 await api.follow(userId, token);
                 setIsFollowing(true);
             }
-            // refresh counts
+            // Refresh counts
             const [f1, f2] = await Promise.all([
                 api.userFollowers(userId, token),
                 api.userFollowing(userId, token),
@@ -67,72 +79,209 @@ export default function Profile() {
             setFollowing(f2);
         } catch (err: unknown) {
             console.error("Failed to toggle follow:", (err as Error)?.message);
+        } finally {
+            setFollowLoading(false);
         }
     }
 
     return (
-        <div className="space-y-6">
-            <section className="rounded border border-gray-200 bg-white p-4">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <h1 className="text-xl font-semibold">
-                            {userDetails
-                                ? `${userDetails.firstName} ${userDetails.lastName}`
-                                : `User ${userId}`}
-                        </h1>
-                        <p className="text-sm text-gray-600">
-                            {userDetails && (
-                                <>
-                                    <span>{userDetails.email}</span>
-                                    {userDetails.phoneNumber && (
-                                        <span> • {userDetails.phoneNumber}</span>
-                                    )}
-                                </>
-                            )}
-                        </p>
-                        <p className="text-sm text-gray-600">
-                            Followers {followers.length} • Following {following.length}
-                        </p>
-                    </div>
-                    {!isOwn && isFollowing !== null && (
-                        <button
-                            onClick={toggleFollow}
-                            className={`inline-flex items-center gap-2 rounded px-3 py-2 text-sm font-medium border border-gray-300 ${isFollowing
-                                ? "bg-white text-gray-900 hover:bg-gray-50"
-                                : "bg-[#5296dd] text-white hover:bg-[#5296dd]/90"
-                                }`}
-                        >
-                            {isFollowing ? (
-                                <UserMinusIcon className="size-4" />
-                            ) : (
-                                <UserPlusIcon className="size-4" />
-                            )}
-                            {isFollowing ? "Unfollow" : "Follow"}
-                        </button>
-                    )}
-                </div>
-            </section>
+        <div className={classNames(
+            "min-h-screen transition-colors duration-200",
+            isDark ? "bg-black" : "bg-gray-50"
+        )}>
+            <div className="mx-auto max-w-2xl px-4 py-8 space-y-6">
+                {/* Profile Header */}
+                <section className={classNames(
+                    "rounded-2xl border p-6 transition-all duration-200",
+                    isDark
+                        ? "border-gray-800 bg-gray-900/50 backdrop-blur-sm"
+                        : "border-gray-200 bg-white"
+                )}>
+                    <div className="flex items-start justify-between">
+                        <div className="flex items-start gap-4">
+                            {/* Avatar */}
+                            <div className="size-20 rounded-2xl bg-gradient-to-br from-[#5296dd] to-[#92bddf] text-white grid place-items-center text-2xl font-bold shadow-lg">
+                                {userDetails?.firstName?.[0] || <UserIcon className="size-8" />}
+                            </div>
 
-            <section className="space-y-3">
-                {posts.length === 0 ? (
-                    <div className="text-center text-gray-600">No posts yet.</div>
-                ) : (
-                    posts.map((p) => (
-                        <article
-                            key={p.id}
-                            className="rounded border border-gray-200 bg-white p-4"
-                        >
-                            <div className="mb-2 text-sm text-gray-500">
-                                {new Date(p.createdAt).toLocaleString()}
+                            {/* User Info */}
+                            <div className="space-y-2">
+                                <div>
+                                    <h1 className={classNames(
+                                        "text-2xl font-bold transition-colors duration-200",
+                                        isDark ? "text-white" : "text-gray-900"
+                                    )}>
+                                        {userDetails
+                                            ? `${userDetails.firstName} ${userDetails.lastName}`
+                                            : `User ${userId}`}
+                                    </h1>
+                                    {userDetails && (
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            {userDetails.email}
+                                            {userDetails.phoneNumber && (
+                                                <span> • {userDetails.phoneNumber}</span>
+                                            )}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Stats */}
+                                <div className="flex items-center gap-6 text-sm">
+                                    <div className={classNames(
+                                        "transition-colors duration-200",
+                                        isDark ? "text-gray-300" : "text-gray-600"
+                                    )}>
+                                        <span className="font-semibold text-lg">{followers.length}</span>
+                                        <span className="ml-1">Followers</span>
+                                    </div>
+                                    <div className={classNames(
+                                        "transition-colors duration-200",
+                                        isDark ? "text-gray-300" : "text-gray-600"
+                                    )}>
+                                        <span className="font-semibold text-lg">{following.length}</span>
+                                        <span className="ml-1">Following</span>
+                                    </div>
+                                    <div className={classNames(
+                                        "transition-colors duration-200",
+                                        isDark ? "text-gray-300" : "text-gray-600"
+                                    )}>
+                                        <span className="font-semibold text-lg">{posts.length}</span>
+                                        <span className="ml-1">Posts</span>
+                                    </div>
+                                </div>
                             </div>
-                            <p className="whitespace-pre-wrap text-[15px]">{p.content}</p>
-                            <div className="mt-3 text-sm text-gray-500">
-                                 • Up {p.upVotes} • Down {p.downVotes}
-                            </div>
-                        </article>
-                    ))
-                )}
-            </section>
+                        </div>
+
+                        {/* Follow Button */}
+                        {!isOwn && isFollowing !== null && (
+                            <button
+                                onClick={toggleFollow}
+                                disabled={followLoading}
+                                className={classNames(
+                                    "inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all duration-200",
+                                    "disabled:opacity-50",
+                                    isFollowing
+                                        ? isDark
+                                            ? "bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700"
+                                            : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+                                        : "bg-gradient-to-r from-[#5296dd] to-[#92bddf] text-white hover:shadow-lg hover:scale-105"
+                                )}
+                            >
+                                {isFollowing ? (
+                                    <UserMinusIcon className="size-4" />
+                                ) : (
+                                    <UserPlusIcon className="size-4" />
+                                )}
+                                {followLoading
+                                    ? "..."
+                                    : isFollowing
+                                        ? "Unfollow"
+                                        : "Follow"
+                                }
+                            </button>
+                        )}
+                    </div>
+                </section>
+
+                {/* Posts */}
+                <section className="space-y-4">
+                    <h2 className={classNames(
+                        "text-lg font-semibold transition-colors duration-200",
+                        isDark ? "text-white" : "text-gray-900"
+                    )}>
+                        {isOwn ? "Your Posts" : "Posts"}
+                    </h2>
+
+                    {posts.length === 0 ? (
+                        <div className={classNames(
+                            "text-center py-12 rounded-2xl border transition-colors duration-200",
+                            isDark
+                                ? "border-gray-800 bg-gray-900/30 text-gray-400"
+                                : "border-gray-200 bg-white text-gray-500"
+                        )}>
+                            <UserIcon className="size-12 mx-auto mb-4 opacity-50" />
+                            <p className="text-lg font-medium mb-2">No posts yet</p>
+                            <p className="text-sm">
+                                {isOwn ? "Create your first post to get started." : "This user hasn't posted anything yet."}
+                            </p>
+                        </div>
+                    ) : (
+                        posts.map((p) => (
+                            <article
+                                key={p.id}
+                                className={classNames(
+                                    "rounded-2xl border p-6 transition-all duration-200 hover:shadow-lg",
+                                    isDark
+                                        ? "border-gray-800 bg-gray-900/50 backdrop-blur-sm"
+                                        : "border-gray-200 bg-white"
+                                )}
+                            >
+                                {/* Post Header */}
+                                <div className="mb-4 flex items-center gap-3">
+                                    <div className="size-8 rounded-full bg-gradient-to-br from-[#5296dd] to-[#92bddf] text-white grid place-items-center text-sm font-medium">
+                                        {userDetails?.firstName?.[0] || "?"}
+                                    </div>
+                                    <div className="text-sm text-gray-500">
+                                        {new Date(p.createdAt).toLocaleString()}
+                                    </div>
+                                </div>
+
+                                {/* Post Content */}
+                                <p className={classNames(
+                                    "whitespace-pre-wrap text-[15px] leading-relaxed mb-4 transition-colors duration-200",
+                                    isDark ? "text-gray-200" : "text-gray-900"
+                                )}>
+                                    {p.content}
+                                </p>
+
+                                {/* Post Actions (Modernized) */}
+                                <div className="flex items-center gap-4 pt-3 border-t border-gray-200 dark:border-gray-800">
+                                    <button
+                                        type="button"
+                                        className={classNames(
+                                            "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                                            p.currentUserVote === true
+                                                ? "text-[#5296dd] bg-[#5296dd]/10"
+                                                : isDark
+                                                    ? "text-gray-400 hover:text-gray-200 hover:bg-gray-800"
+                                                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                                        )}
+                                        tabIndex={-1}
+                                        disabled
+                                    >
+                                        {p.currentUserVote === true ? (
+                                            <HandThumbUpIcon className="size-4" />
+                                        ) : (
+                                            <HandThumbUpIcon className="size-4 opacity-60" />
+                                        )}
+                                        {p.upVotes}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className={classNames(
+                                            "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                                            p.currentUserVote === false
+                                                ? "text-red-500 bg-red-50 dark:bg-red-900/20"
+                                                : isDark
+                                                    ? "text-gray-400 hover:text-gray-200 hover:bg-gray-800"
+                                                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                                        )}
+                                        tabIndex={-1}
+                                        disabled
+                                    >
+                                        {p.currentUserVote === false ? (
+                                            <HandThumbDownIcon className="size-4" />
+                                        ) : (
+                                            <HandThumbDownIcon className="size-4 opacity-60" />
+                                        )}
+                                        {p.downVotes}
+                                    </button>
+                                </div>
+                            </article>
+                        ))
+                    )}
+                </section>
+            </div>
         </div>
     );
 }

@@ -57,12 +57,12 @@ export const api = {
 
     getUserByEmail: (email: string, token: string) =>
         request<User>(
-            `/api/auth/user/${encodeURIComponent(email)}`,
+            `/api/auth/user?email=${encodeURIComponent(email)}`,
             { method: "GET" },
             token,
         ),
-    
-        getUserById: (userId: number, token: string) =>
+
+    getUserById: (userId: number, token: string) =>
         request<User>(
             `/api/auth/user/${userId}`,
             { method: "GET" },
