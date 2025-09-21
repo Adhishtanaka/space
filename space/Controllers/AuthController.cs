@@ -40,6 +40,17 @@ public class AuthController : ControllerBase
         return Ok(userDetails);
     }
 
+    [HttpGet("user")]
+    public async Task<IActionResult> GetUserByEmail([FromQuery] string email)
+    {
+        var (success, userDetails, error) = await _authService.GetUserByEmailAsync(email);
+        if (!success || userDetails == null)
+        {
+            return NotFound(new { message = error ?? "User not found" });
+        }
+        return Ok(userDetails);
+    }
+
     [HttpGet("users")]
     public async Task<IActionResult> GetAllUsers()
     {
