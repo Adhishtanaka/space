@@ -211,7 +211,7 @@ export default function Profile() {
                                 post={p}
                                 token={token || ""}
                                 isDark={isDark}
-                                isOwner={true}
+                                isOwner={isOwn}
                                 onVoteChange={() => { }}
                             />
                         ))
