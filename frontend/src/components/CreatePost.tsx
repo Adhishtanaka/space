@@ -26,19 +26,25 @@ export default function CreatePost({ token, isDark, onPostCreated }: CreatePostP
     const characterCount = content.length;
     const isOverLimit = characterCount > MAX_CHARACTERS;
 
+
     function handleContentChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
         const rawValue = e.target.value;
-
         // auto-resize but stop at maxHeight
         e.target.style.height = "auto";
         e.target.style.height = `${Math.min(e.target.scrollHeight, 300)}px`;
-
-        if (rawValue.length <= MAX_CHARACTERS || rawValue.length < content.length) {
-            setContent(rawValue);
-            if (error && rawValue.length <= MAX_CHARACTERS) {
-                setError(null);
-            }
+        setContent(rawValue);
+        if (error && rawValue.length <= MAX_CHARACTERS) {
+            setError(null);
         }
+    }
+
+    function handlePaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+        // Let the paste happen, then update the textarea height
+        setTimeout(() => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = "auto";
+            target.style.height = `${Math.min(target.scrollHeight, 300)}px`;
+        }, 0);
     }
 
 
@@ -73,9 +79,11 @@ export default function CreatePost({ token, isDark, onPostCreated }: CreatePostP
         >
             <div className="space-y-4">
                 <div className="relative">
+
                     <textarea
                         value={content}
                         onChange={handleContentChange}
+                        onPaste={handlePaste}
                         placeholder="Share what's on your mind..."
                         style={{ overflow: "hidden", maxHeight: "300px" }}
                         className={classNames(
