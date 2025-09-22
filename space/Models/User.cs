@@ -7,7 +7,7 @@ public class User
     public string? PhoneNumber { get; set; }
     public DateTime DateOfBirth { get; set; }
     public string PasswordHash { get; set; } = null!;
-    public string Geohash { get; set; } = null!; 
+    public string? Geohash { get; set; }
 
     // Navigation properties
     public ICollection<Post> Posts { get; set; } = [];
