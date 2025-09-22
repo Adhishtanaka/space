@@ -4,11 +4,10 @@ import { useAuth } from "../lib/useAuth";
 import { useTheme } from "../lib/useTheme";
 import { api } from "../lib/api";
 import type { Post, FollowUser, User } from "../lib/types";
+import PostComponent from "../components/Post";
 import {
     UserPlusIcon,
     UserMinusIcon,
-    HandThumbUpIcon,
-    HandThumbDownIcon,
     UserIcon,
 } from "@heroicons/react/24/outline";
 
@@ -207,77 +206,14 @@ export default function Profile() {
                         </div>
                     ) : (
                         posts.map((p) => (
-                            <article
+                            <PostComponent
                                 key={p.id}
-                                className={classNames(
-                                    "rounded-2xl border p-6 transition-all duration-200 hover:shadow-lg",
-                                    isDark
-                                        ? "border-gray-800 bg-gray-900/50 backdrop-blur-sm"
-                                        : "border-gray-200 bg-white"
-                                )}
-                            >
-                                {/* Post Header */}
-                                <div className="mb-4 flex items-center gap-3">
-                                    <div className="size-8 rounded-full bg-gradient-to-br from-[#5296dd] to-[#92bddf] text-white grid place-items-center text-sm font-medium">
-                                        {userDetails?.firstName?.[0] || "?"}
-                                    </div>
-                                    <div className="text-sm text-gray-500">
-                                        {new Date(p.createdAt).toLocaleString()}
-                                    </div>
-                                </div>
-
-                                {/* Post Content */}
-                                <p className={classNames(
-                                    "whitespace-pre-wrap text-[15px] leading-relaxed mb-4 transition-colors duration-200",
-                                    isDark ? "text-gray-200" : "text-gray-900"
-                                )}>
-                                    {p.content}
-                                </p>
-
-                                {/* Post Actions (Modernized) */}
-                                <div className="flex items-center gap-4 pt-3 border-t border-gray-200 dark:border-gray-800">
-                                    <button
-                                        type="button"
-                                        className={classNames(
-                                            "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                                            p.currentUserVote === true
-                                                ? "text-[#5296dd] bg-[#5296dd]/10"
-                                                : isDark
-                                                    ? "text-gray-400 hover:text-gray-200 hover:bg-gray-800"
-                                                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                                        )}
-                                        tabIndex={-1}
-                                        disabled
-                                    >
-                                        {p.currentUserVote === true ? (
-                                            <HandThumbUpIcon className="size-4" />
-                                        ) : (
-                                            <HandThumbUpIcon className="size-4 opacity-60" />
-                                        )}
-                                        {p.upVotes}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className={classNames(
-                                            "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                                            p.currentUserVote === false
-                                                ? "text-red-500 bg-red-50 dark:bg-red-900/20"
-                                                : isDark
-                                                    ? "text-gray-400 hover:text-gray-200 hover:bg-gray-800"
-                                                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                                        )}
-                                        tabIndex={-1}
-                                        disabled
-                                    >
-                                        {p.currentUserVote === false ? (
-                                            <HandThumbDownIcon className="size-4" />
-                                        ) : (
-                                            <HandThumbDownIcon className="size-4 opacity-60" />
-                                        )}
-                                        {p.downVotes}
-                                    </button>
-                                </div>
-                            </article>
+                                post={p}
+                                token={token || ""}
+                                isDark={isDark}
+                                isOwner={true}
+                                onVoteChange={() => { }}
+                            />
                         ))
                     )}
                 </section>

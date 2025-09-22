@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router";
 import { useEffect } from "react";
 import Header from "./components/Headers";
+import Footer from "./components/Footer";
 import { AuthProvider } from "./lib/auth";
 import { useTheme } from "./lib/useTheme";
 import Home from "./pages/home";
@@ -27,13 +28,14 @@ function AppLayout() {
 
   return (
     <div className={classNames(
-      "min-h-screen transition-colors duration-200",
+      "min-h-screen flex flex-col transition-colors duration-200",
       isDark ? "bg-black" : "bg-gray-50"
     )}>
       <Header />
-      <main>
+      <main className="flex-1">
         <Outlet />
       </main>
+      <Footer />
     </div>
   );
 }

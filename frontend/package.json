@@ -12,9 +12,13 @@
   "dependencies": {
     "@headlessui/react": "^2.2.8",
     "@heroicons/react": "^2.2.0",
+    "@mariusbongarts/previewbox": "^0.0.24",
     "@microsoft/signalr": "^9.0.6",
     "@tailwindcss/vite": "^4.1.13",
     "axios": "^1.12.2",
+    "dompurify": "^3.2.7",
+    "linkify-react": "^4.3.2",
+    "linkifyjs": "^4.3.2",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router": "^7.9.1",

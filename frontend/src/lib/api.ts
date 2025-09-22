@@ -1,41 +1,51 @@
-// Fetch user details by email
-export async function getUserByEmail(email: string, token: string) {
-    const res = await fetch(`/api/auth/user/${encodeURIComponent(email)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!res.ok) throw new Error('Failed to fetch user details');
-    return res.json();
-}
+import axios, { type AxiosRequestConfig } from "axios";
 import type { User, Post, FollowUser, LoginResponse } from "./types";
 
 const BASE_URL = "http://localhost:5106";
 
+// Axios instance
+const apiClient = axios.create({
+    baseURL: BASE_URL,
+    headers: {
+        "Content-Type": "application/json",
+    },
+});
+
+// Request wrapper
 async function request<T>(
     path: string,
-    options: RequestInit = {},
-    token?: string,
+    options: AxiosRequestConfig = {},
+    token?: string
 ): Promise<T> {
-    const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-        ...(options.headers as Record<string, string>),
-    };
-    if (token) headers["Authorization"] = `Bearer ${token}`;
-
-    const res = await fetch(`${BASE_URL}${path}`, {
-        ...options,
-        headers,
-        cache: "no-store",
-    });
-    if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || `Request failed: ${res.status}`);
+    try {
+        const res = await apiClient.request<T>({
+            url: path,
+            ...options,
+            headers: {
+                ...(options.headers || {}),
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+        });
+        return res.data;
+    } catch (err: unknown) {
+        let msg = "Request failed";
+        if (axios.isAxiosError(err)) {
+            msg =
+                err.response?.data?.message ||
+                err.response?.data ||
+                err.message ||
+                msg;
+        } else if (err instanceof Error) {
+            msg = err.message;
+        }
+        throw new Error(msg);
     }
-    if (res.status === 204) return undefined as unknown as T;
-    return (await res.json()) as T;
 }
 
-// Auth
+
+// API methods
 export const api = {
+    // Auth
     register: (data: {
         firstName: string;
         lastName: string;
@@ -44,30 +54,26 @@ export const api = {
         dateOfBirth: string;
         password: string;
     }) =>
-        request<void>(`/api/auth/register`, {
+        request<void>("/api/auth/register", {
             method: "POST",
-            body: JSON.stringify(data),
+            data,
         }),
 
     login: (data: { email: string; password: string }) =>
-        request<LoginResponse>(`/api/auth/login`, {
+        request<LoginResponse>("/api/auth/login", {
             method: "POST",
-            body: JSON.stringify(data),
+            data,
         }),
 
     getUserByEmail: (email: string, token: string) =>
         request<User>(
             `/api/auth/user?email=${encodeURIComponent(email)}`,
             { method: "GET" },
-            token,
+            token
         ),
 
     getUserById: (userId: number, token: string) =>
-        request<User>(
-            `/api/auth/user/${userId}`,
-            { method: "GET" },
-            token,
-        ),
+        request<User>(`/api/auth/user/${userId}`, { method: "GET" }, token),
 
     getAllUsers: (token: string) =>
         request<User[]>(`/api/auth/users`, { method: "GET" }, token),
@@ -76,8 +82,8 @@ export const api = {
     createPost: (content: string, token: string) =>
         request<Post>(
             `/api/post`,
-            { method: "POST", body: JSON.stringify({ content }) },
-            token,
+            { method: "POST", data: { content } },
+            token
         ),
 
     getFeed: (token: string) =>
@@ -89,8 +95,8 @@ export const api = {
     vote: (postId: number, isUpVote: boolean, token: string) =>
         request<void>(
             `/api/post/vote`,
-            { method: "POST", body: JSON.stringify({ postId, isUpVote }) },
-            token,
+            { method: "POST", data: { postId, isUpVote } },
+            token
         ),
 
     removeVote: (postId: number, token: string) =>
@@ -100,15 +106,15 @@ export const api = {
     follow: (userId: number, token: string) =>
         request<void>(
             `/api/follow/follow`,
-            { method: "POST", body: JSON.stringify({ userId }) },
-            token,
+            { method: "POST", data: { userId } },
+            token
         ),
 
     unfollow: (userId: number, token: string) =>
         request<void>(
             `/api/follow/unfollow`,
-            { method: "POST", body: JSON.stringify({ userId }) },
-            token,
+            { method: "POST", data: { userId } },
+            token
         ),
 
     followers: (token: string) =>
@@ -117,27 +123,36 @@ export const api = {
     following: (token: string) =>
         request<FollowUser[]>(`/api/follow/following`, { method: "GET" }, token),
 
-    suggested: (token: string) =>
+    suggestUsers: (token: string) =>
         request<FollowUser[]>(`/api/follow/suggested`, { method: "GET" }, token),
 
     isFollowing: (userId: number, token: string) =>
         request<{ isFollowing: boolean }>(
             `/api/follow/is-following/${userId}`,
             { method: "GET" },
-            token,
+            token
         ),
 
     userFollowers: (userId: number, token: string) =>
         request<FollowUser[]>(
             `/api/follow/followers/${userId}`,
             { method: "GET" },
-            token,
+            token
         ),
 
     userFollowing: (userId: number, token: string) =>
         request<FollowUser[]>(
             `/api/follow/following/${userId}`,
             { method: "GET" },
-            token,
+            token
         ),
+    updatePost: (postId: number, content: string, token: string) =>
+        request<Post>(
+            `/api/post/${postId}`,
+            { method: "PUT", data: { content } },
+            token
+        ),
+
+    deletePost: (postId: number, token: string) =>
+        request<void>(`/api/post/${postId}`, { method: "DELETE" }, token)
 };

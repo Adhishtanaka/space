@@ -7,6 +7,23 @@ export interface User {
   dateOfBirth: string;
 }
 
+export interface CreatePostProps {
+    token: string;
+    isDark: boolean;
+    onPostCreated: (post: Post) => void;
+}
+
+export interface PostProps {
+    post: Post;
+    token: string;
+    isDark: boolean;
+    isOwner?: boolean;
+    currentUserId?: number;
+    onVoteChange: (updatedPost: Post) => void;
+    onPostUpdate?: (updatedPost: Post) => void;
+    onPostDelete?: (postId: number) => void;
+}
+
 export interface Post {
   id: number;
   content: string;
