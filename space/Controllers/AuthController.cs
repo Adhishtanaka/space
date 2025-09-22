@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -60,5 +61,40 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = error ?? "Failed to retrieve users" });
         }
         return Ok(users);
+    }
+
+    [HttpPost("geohash")]
+    public async Task<IActionResult> UpdateGeohash([FromQuery] string geohash)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == null)
+            return Unauthorized();
+
+        var (success, error) = await _authService.UpdateGeohashAsync(userId.Value, geohash);
+        if (!success)
+            return BadRequest(new { message = error });
+
+        return Ok(new { message = "Geohash updated successfully" });
+    }
+
+    [HttpGet("geohash/{hash}")]
+    public async Task<IActionResult> GetUserByGeohash(string hash, [FromQuery] int precision = 5)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == null)
+            return Unauthorized();
+
+        var (success, usergeoDetails, error) = await _authService.GetUsersByGeohashAsync(userId.Value, hash, precision);
+        if (!success)
+            return BadRequest(new { message = error });
+
+        return Ok(usergeoDetails);
+    }
+
+
+    private int? GetCurrentUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(userIdClaim, out var userId) ? userId : null;
     }
 }

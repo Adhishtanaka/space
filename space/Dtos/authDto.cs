@@ -32,6 +32,15 @@ public class UserDto
     public ICollection<int> FollowedUsers { get; set; } = new List<int>();
 }
 
+public class UserGeoDto
+{
+    public int Id { get; set; }
+    public string FirstName { get; set; } = null!;
+    public string LastName { get; set; } = null!;
+    public string Email { get; set; } = null!;
+    public string Geohash { get; set; } = null!;
+}
+
 public interface IAuthService
 {
     Task<(bool Success, string? ErrorMessage)> RegisterAsync(RegisterRequest request);
@@ -39,4 +48,6 @@ public interface IAuthService
     Task<(bool Success, UserDto? UserDetails, string? ErrorMessage)> GetUserByEmailAsync(string email);
     Task<(bool Success, UserDto? UserDetails, string? ErrorMessage)> GetUserByIdAsync(int userId);
     Task<(bool Success, List<UserDto> Users, string? ErrorMessage)> GetAllUsersAsync();
+    Task<(bool success, string? ErrorMessage)> UpdateGeohashAsync(int userId, string geohash);
+    Task<(bool Success, List<UserGeoDto> Users, string? ErrorMessage)> GetUsersByGeohashAsync(int excludeUserId ,string geohash, int precision);
 }

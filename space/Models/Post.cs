@@ -5,7 +5,7 @@ public class Post
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public int UserId { get; set; }
     public User User { get; set; } = null!;
-    public ICollection<Vote> Votes { get; set; } = new List<Vote>();
+    public ICollection<Vote> Votes { get; set; } = [];
 
     public int UpVotes => Votes.Count(v => v.IsUpVote);
     public int DownVotes => Votes.Count(v => !v.IsUpVote);
