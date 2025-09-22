@@ -28,6 +28,20 @@ public class PostController : ControllerBase
         return Ok(post);
     }
 
+    [HttpPut("{postId}")]
+    public async Task<IActionResult> UpdatePost(int postId, [FromBody] UpdatePostRequest request)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == null)
+            return Unauthorized();
+
+        var (success, post, error) = await _postService.UpdatePostAsync(userId.Value, postId, request);
+        if (!success)
+            return BadRequest(new { message = error });
+
+        return Ok(post);
+    }
+
     [HttpGet("feed")]
     public async Task<IActionResult> GetFeed()
     {
@@ -82,6 +96,20 @@ public class PostController : ControllerBase
             return BadRequest(new { message = error });
 
         return Ok(new { message = "Vote removed successfully" });
+    }
+
+    [HttpDelete("{postId}")]
+    public async Task<IActionResult> DeletePost(int postId)
+    {
+        var userId = GetCurrentUserId();
+        if (userId == null)
+            return Unauthorized();
+
+        var (success, error) = await _postService.DeletePostAsync(userId.Value, postId);
+        if (!success)
+            return BadRequest(new { message = error });
+
+        return Ok(new { message = "Post deleted successfully" });
     }
 
     private int? GetCurrentUserId()

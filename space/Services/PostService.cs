@@ -1,5 +1,11 @@
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
+
+public class UpdatePostRequest
+{
+    public string Content { get; set; } = string.Empty;
+}
 
 public interface IPostService
 {
@@ -8,8 +14,9 @@ public interface IPostService
     Task<(bool Success, List<PostDto> Posts, string? ErrorMessage)> GetUserPostsAsync(int userId, int currentUserId);
     Task<(bool Success, string? ErrorMessage)> VoteAsync(int userId, VoteRequest request);
     Task<(bool Success, string? ErrorMessage)> RemoveVoteAsync(int userId, int postId);
+    Task<(bool Success, string? ErrorMessage)> DeletePostAsync(int userId, int postId);
+    Task<(bool Success, PostDto? Post, string? ErrorMessage)> UpdatePostAsync(int userId, int postId, UpdatePostRequest request);
 }
-
 public class PostService : IPostService
 {
     private readonly AppDbContext _db;
@@ -74,6 +81,39 @@ public class PostService : IPostService
 
         return (true, postDto, null);
     }
+
+
+    public async Task<(bool Success, PostDto? Post, string? ErrorMessage)> UpdatePostAsync(int userId, int postId, UpdatePostRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Content))
+            return (false, null, "Post content cannot be empty");
+
+        var post = await _db.Posts.Include(p => p.User).Include(p => p.Votes).FirstOrDefaultAsync(p => p.Id == postId);
+        if (post == null)
+            return (false, null, "Post not found");
+        if (post.UserId != userId)
+            return (false, null, "You are not authorized to update this post");
+
+        post.Content = request.Content;
+        await _db.SaveChangesAsync();
+
+        var postDto = new PostDto
+        {
+            Id = post.Id,
+            Content = post.Content,
+            CreatedAt = post.CreatedAt,
+            UserId = post.UserId,
+            UserFirstName = post.User.FirstName,
+            UserLastName = post.User.LastName,
+            UpVotes = post.UpVotes,
+            DownVotes = post.DownVotes,
+            TotalScore = post.TotalScore,
+            CurrentUserVote = GetUserVote(post.Votes, userId)
+        };
+
+        return (true, postDto, null);
+    }
+
 
     public async Task<(bool Success, List<PostDto> Posts, string? ErrorMessage)> GetFeedAsync(int userId)
     {
@@ -174,6 +214,21 @@ public class PostService : IPostService
             return (false, "Vote not found");
 
         _db.Votes.Remove(vote);
+        await _db.SaveChangesAsync();
+        return (true, null);
+    }
+
+    public async Task<(bool Success, string? ErrorMessage)> DeletePostAsync(int userId, int postId)
+    {
+        var post = await _db.Posts.Include(p => p.Votes).FirstOrDefaultAsync(p => p.Id == postId);
+        if (post == null)
+            return (false, "Post not found");
+        if (post.UserId != userId)
+            return (false, "You are not authorized to delete this post");
+
+        // Remove votes associated with the post
+        _db.Votes.RemoveRange(post.Votes);
+        _db.Posts.Remove(post);
         await _db.SaveChangesAsync();
         return (true, null);
     }
