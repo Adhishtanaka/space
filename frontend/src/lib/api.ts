@@ -1,5 +1,5 @@
 import axios, { type AxiosRequestConfig } from "axios";
-import type { User, Post, FollowUser, LoginResponse } from "./types";
+import type { User, Post, FollowUser, LoginResponse, UserGeo } from "./types";
 
 const BASE_URL = "http://localhost:5106";
 
@@ -154,5 +154,19 @@ export const api = {
         ),
 
     deletePost: (postId: number, token: string) =>
-        request<void>(`/api/post/${postId}`, { method: "DELETE" }, token)
+        request<void>(`/api/post/${postId}`, { method: "DELETE" }, token),
+
+    updateGeohash: (geohash: string, token: string) =>
+        request<void>(
+            `/api/Auth/geohash?geohash=${encodeURIComponent(geohash)}`,
+            { method: "POST" },
+            token
+        ),
+
+    getNearbyUsers: (hash: string, precision: number = 5, token: string) =>
+        request<UserGeo[]>(
+            `/api/Auth/geohash/${encodeURIComponent(hash)}?precision=${precision}`,
+            { method: "GET" },
+            token
+        ),
 };

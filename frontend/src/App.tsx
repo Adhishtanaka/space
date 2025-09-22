@@ -9,6 +9,7 @@ import Login from "./pages/login";
 import Register from "./pages/register";
 import Feed from "./pages/feed";
 import Profile from "./pages/profile";
+import MapPage from "./pages/map";
 
 function classNames(...classes: (string | false | undefined)[]) {
   return classes.filter(Boolean).join(" ");
@@ -65,6 +66,10 @@ const router = createBrowserRouter([
         path: "profile/:id",
         element: <Profile />,
       },
+      {
+        path: "map",
+        element: <MapPage />, // Assuming MapPage is defined elsewhere
+      }
     ],
   },
 ]);

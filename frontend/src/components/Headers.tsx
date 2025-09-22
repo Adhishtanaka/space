@@ -6,9 +6,9 @@ import { Fragment } from "react";
 import {
   UserIcon,
   ArrowRightStartOnRectangleIcon,
-  HomeIcon,
   MoonIcon,
   SunIcon,
+  MapIcon
 } from "@heroicons/react/24/outline";
 
 function classNames(...classes: (string | false | undefined)[]) {
@@ -24,8 +24,8 @@ export default function Header() {
   return (
     <header className={classNames(
       "sticky top-0 z-50 border-b backdrop-blur-lg transition-colors duration-200",
-      isDark 
-        ? "border-gray-800 bg-black/90" 
+      isDark
+        ? "border-gray-800 bg-black/90"
         : "border-gray-200 bg-white/90"
     )}>
       <div className="mx-auto max-w-4xl px-6 py-4 flex items-center justify-between">
@@ -51,10 +51,10 @@ export default function Header() {
             to="/feed"
             className={classNames(
               "px-4 py-2 rounded-lg transition-all duration-200 font-medium",
-              location.pathname === "/feed" 
-                ? "text-[#5296dd] bg-[#5296dd]/10" 
-                : isDark 
-                  ? "text-gray-300 hover:text-white hover:bg-gray-800" 
+              location.pathname === "/feed"
+                ? "text-[#5296dd] bg-[#5296dd]/10"
+                : isDark
+                  ? "text-gray-300 hover:text-white hover:bg-gray-800"
                   : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
             )}
           >
@@ -65,10 +65,10 @@ export default function Header() {
               to={`/profile/${user.id}`}
               className={classNames(
                 "px-4 py-2 rounded-lg transition-all duration-200 font-medium",
-                location.pathname?.startsWith("/profile") 
-                  ? "text-[#5296dd] bg-[#5296dd]/10" 
-                  : isDark 
-                    ? "text-gray-300 hover:text-white hover:bg-gray-800" 
+                location.pathname?.startsWith("/profile")
+                  ? "text-[#5296dd] bg-[#5296dd]/10"
+                  : isDark
+                    ? "text-gray-300 hover:text-white hover:bg-gray-800"
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
               )}
             >
@@ -84,8 +84,8 @@ export default function Header() {
             onClick={toggleTheme}
             className={classNames(
               "p-2 rounded-lg transition-all duration-200",
-              isDark 
-                ? "text-gray-300 hover:text-white hover:bg-gray-800" 
+              isDark
+                ? "text-gray-300 hover:text-white hover:bg-gray-800"
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
             )}
           >
@@ -102,8 +102,8 @@ export default function Header() {
                 to="/login"
                 className={classNames(
                   "px-4 py-2 rounded-lg border transition-all duration-200 font-medium",
-                  isDark 
-                    ? "border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600" 
+                  isDark
+                    ? "border-gray-700 text-gray-300 hover:bg-gray-800 hover:border-gray-600"
                     : "border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400"
                 )}
               >
@@ -120,8 +120,8 @@ export default function Header() {
             <Menu as="div" className="relative">
               <Menu.Button className={classNames(
                 "flex items-center gap-2 rounded-lg px-3 py-2 transition-all duration-200",
-                isDark 
-                  ? "hover:bg-gray-800" 
+                isDark
+                  ? "hover:bg-gray-800"
                   : "hover:bg-gray-100"
               )}>
                 <div className="size-8 rounded-full bg-gradient-to-br from-[#5296dd] to-[#92bddf] text-white grid place-items-center font-medium text-sm">
@@ -145,44 +145,26 @@ export default function Header() {
               >
                 <Menu.Items className={classNames(
                   "absolute right-0 mt-2 w-48 origin-top-right rounded-xl border shadow-xl focus:outline-none",
-                  isDark 
-                    ? "border-gray-800 bg-gray-900" 
+                  isDark
+                    ? "border-gray-800 bg-gray-900"
                     : "border-gray-200 bg-white"
                 )}>
                   <div className="p-2">
                     <Menu.Item>
                       {({ active }) => (
                         <button
-                          onClick={() => navigate(`/profile/${user.id}`)}
+                          onClick={() => navigate("/map")}
                           className={classNames(
                             "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all duration-150",
-                            active 
-                              ? "bg-[#5296dd]/10 text-[#5296dd]" 
-                              : isDark 
-                                ? "text-gray-300 hover:bg-gray-800" 
+                            active
+                              ? "bg-[#5296dd]/10 text-[#5296dd]"
+                              : isDark
+                                ? "text-gray-300 hover:bg-gray-800"
                                 : "text-gray-700 hover:bg-gray-100"
                           )}
                         >
-                          <UserIcon className="size-4" />
-                          Your profile
-                        </button>
-                      )}
-                    </Menu.Item>
-                    <Menu.Item>
-                      {({ active }) => (
-                        <button
-                          onClick={() => navigate("/feed")}
-                          className={classNames(
-                            "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-all duration-150",
-                            active 
-                              ? "bg-[#5296dd]/10 text-[#5296dd]" 
-                              : isDark 
-                                ? "text-gray-300 hover:bg-gray-800" 
-                                : "text-gray-700 hover:bg-gray-100"
-                          )}
-                        >
-                          <HomeIcon className="size-4" />
-                          Feed
+                          <MapIcon className="size-4" />
+                          Map
                         </button>
                       )}
                     </Menu.Item>

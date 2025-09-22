@@ -8,20 +8,20 @@ export interface User {
 }
 
 export interface CreatePostProps {
-    token: string;
-    isDark: boolean;
-    onPostCreated: (post: Post) => void;
+  token: string;
+  isDark: boolean;
+  onPostCreated: (post: Post) => void;
 }
 
 export interface PostProps {
-    post: Post;
-    token: string;
-    isDark: boolean;
-    isOwner?: boolean;
-    currentUserId?: number;
-    onVoteChange: (updatedPost: Post) => void;
-    onPostUpdate?: (updatedPost: Post) => void;
-    onPostDelete?: (postId: number) => void;
+  post: Post;
+  token: string;
+  isDark: boolean;
+  isOwner?: boolean;
+  currentUserId?: number;
+  onVoteChange: (updatedPost: Post) => void;
+  onPostUpdate?: (updatedPost: Post) => void;
+  onPostDelete?: (postId: number) => void;
 }
 
 export interface Post {
@@ -54,6 +54,14 @@ export interface AuthUser {
   email: string;
 }
 
+export interface UserGeo {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  Geohash: string;
+}
+
 export interface AuthContextType {
   user: AuthUser | null;
   token: string | null;
@@ -68,4 +76,23 @@ export interface AuthContextType {
     password: string;
   }) => Promise<void>;
   logout: () => void;
+}
+
+export interface Friend {
+    id: string | number;
+    name: string;
+    lat: number;
+    lng: number;
+}
+
+export interface MapViewProps {
+    mounted: boolean;
+    activeTheme: string;
+    tileConfig: { attribution: string; url: string };
+    center: { lat: number; lng: number };
+    mapRef: React.MutableRefObject<L.Map | null>;
+    hasLocation: boolean;
+    user: { firstName?: string } | null;
+    friends: Friend[];
+    isDark: boolean;
 }
