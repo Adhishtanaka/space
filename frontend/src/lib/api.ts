@@ -163,9 +163,9 @@ export const api = {
             token
         ),
 
-    getNearbyUsers: (hash: string, precision: number = 5, token: string) =>
+    getNearbyUsers: (hash: string, token: string) =>
         request<UserGeo[]>(
-            `/api/Auth/geohash/${encodeURIComponent(hash)}?precision=${precision}`,
+            `/api/Auth/geohash/${encodeURIComponent(hash)}`,
             { method: "GET" },
             token
         ),

@@ -1,6 +1,7 @@
 import React, { lazy } from "react";
 import L from "leaflet";
 import type { MapViewProps } from "../lib/types";
+import { Link } from "react-router";
 
 function classNames(...classes: Array<string | undefined | false>) {
     return classes.filter(Boolean).join(" ");
@@ -94,9 +95,13 @@ const MapView: React.FC<MapViewProps> = ({
                                 icon={createCustomMarker(f.name?.[0] || "F")}
                             >
                                 <Popup>
-                                    <div className="text-sm">
+                                    <div
+                                        className="text-sm cursor-pointer hover:bg-gray-100 p-2 rounded transition"
+                                    >
+                                        <Link to={`/profile/${f.id}`}>
                                         <p className="font-medium">{f.name}</p>
-                                        {f.id && <p className="text-xs text-gray-600 mt-1">User ID: {f.id}</p>}
+                                        {f.email && <p className="text-xs text-gray-600">{f.email}</p>}
+                                        </Link>
                                     </div>
                                 </Popup>
                             </Marker>

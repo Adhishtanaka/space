@@ -34,11 +34,10 @@ export default function Home() {
     const { token, user } = useAuth();
     const { isDark } = useTheme();
 
-    const [precision, setPrecision] = useState(5); // 3..8
     const [tileTheme] = useState<TileTheme>("auto");
 
     const [center, setCenter] = useState<{ lat: number; lng: number }>(SRI_LANKA_CENTER);
-    const [hasLocation, setHasLocation] = useState(false); 
+    const [hasLocation, setHasLocation] = useState(false);
     const [geoError, setGeoError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -56,7 +55,17 @@ export default function Home() {
         }
     }, [isDark]);
 
-    const updateLocation = () => {
+    const removeLocation = async () => {
+                if (token) {
+                    try {
+                        await api.updateGeohash("", token);
+                    } catch (e) {
+                        console.warn('Failed to update geohash:', e);
+                    }
+                }    
+    };
+
+        const updateLocation = () => {
         if (!("geolocation" in navigator)) {
             setGeoError("Geolocation not supported");
             return;
@@ -75,10 +84,9 @@ export default function Home() {
                 // Update geohash on backend
                 if (token) {
                     try {
-                        const hash = ngeohash.encode(lat, lng, precision);
+                        const hash = ngeohash.encode(lat, lng);
                         await api.updateGeohash(hash, token);
-                        // Fetch nearby users
-                        const users = await api.getNearbyUsers(hash, precision, token);
+                        const users = await api.getNearbyUsers(hash, token);
                         setNearbyUsers(users);
                     } catch (e) {
                         console.warn('Failed to update geohash:', e);
@@ -93,33 +101,38 @@ export default function Home() {
         );
     };
 
-    // Friends nearby: use real nearby users if available, else empty
     const friends = useMemo(() => {
         if (nearbyUsers && nearbyUsers.length > 0) {
-            return nearbyUsers.map((u, i) => {
-                const { latitude, longitude } = ngeohash.decode(u.Geohash);
+            return nearbyUsers
+                .filter(u => {
+                    const gh = u.Geohash || u.geohash;
+                    return typeof gh === 'string' && gh.length > 0;
+                })
+                .map((u, i) => {
+                    const gh = u.Geohash || u.geohash;
+                    const { latitude, longitude } = ngeohash.decode(gh as string);
 
-                return {
-                    id: u.id || i,
-                    name: u.firstName ? `${u.firstName} ${u.lastName || ''}` : `User ${i + 1}`,
-                    lat: latitude,
-                    lng: longitude,
-                };
-            });
+                    return {
+                        id: u.id || i,
+                        name: u.firstName ? `${u.firstName} ${u.lastName || ''}` : `User ${i + 1}`,
+                        email: u.email,
+                        lat: latitude,
+                        lng: longitude,
+                    };
+                });
         }
         return [];
     }, [nearbyUsers]);
 
-    // Update geohash and fetch nearby users when center or precision changes, but only if user has shared location
+
     useEffect(() => {
         if (hasLocation && center && token) {
-            const hash = ngeohash.encode(center.lat, center.lng, precision);
-            api.updateGeohash(hash, token)
-                .then(() => api.getNearbyUsers(hash, precision, token))
+            const hash = ngeohash.encode(center.lat, center.lng);
+            api.getNearbyUsers(hash, token)
                 .then(setNearbyUsers)
                 .catch(() => { });
         }
-    }, [center, precision, token, hasLocation]);
+    }, [center, token, hasLocation]);
 
     const activeTheme: Exclude<TileTheme, "auto"> = useMemo(() => {
         if (tileTheme === "auto") return isDark ? "dark" : "light";
@@ -164,9 +177,8 @@ export default function Home() {
         )}>
             <div className="mx-auto max-w-2xl px-4 py-8 space-y-6">
                 <MapControls
-                    precision={precision}
-                    setPrecision={setPrecision}
                     updateLocation={updateLocation}
+                    removeLocation={removeLocation}
                     loading={loading}
                     geoError={geoError}
                     friends={friends}

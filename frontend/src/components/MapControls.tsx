@@ -1,106 +1,111 @@
-import { MapPinIcon } from "@heroicons/react/24/outline";
-import React from "react";
+import { Switch } from "@headlessui/react";
+import React, { useEffect, useState } from "react";
 
 function classNames(...classes: Array<string | undefined | false>) {
-    return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(" ");
 }
 
 interface MapControlsProps {
-    precision: number;
-    setPrecision: (v: number) => void;
-    updateLocation: () => void;
-    loading: boolean;
-    geoError: string | null;
-    friends: Array<{ id: string | number; name: string; lat: number; lng: number }>;
-    isDark: boolean;
+  updateLocation: () => void;
+  loading: boolean;
+  geoError: string | null;
+  friends: Array<{ id: string | number; name: string; lat: number; lng: number }>;
+  isDark: boolean;
+  removeLocation?: () => void; 
 }
 
 const MapControls: React.FC<MapControlsProps> = ({
-    precision,
-    setPrecision,
-    updateLocation,
-    loading,
-    geoError,
-    friends,
-    isDark
+  updateLocation,
+  removeLocation,
+  loading,
+  geoError,
+  friends,
+  isDark
 }) => {
-    return (
-        <section className={classNames(
-            "rounded-2xl border p-6 transition-all duration-200",
-            isDark
-                ? "border-gray-800 bg-gray-900/50 backdrop-blur-sm"
-                : "border-gray-200 bg-white"
-        )}>
-            <div className="flex items-center justify-between mb-6">
-                <div>
-                    <p className={classNames(
-                        "text-sm transition-colors duration-200",
-                        isDark ? "text-gray-400" : "text-gray-600"
-                    )}>
-                        Find friends nearby with location sharing
-                    </p>
-                </div>
-            </div>
+  const [locationEnabled, setLocationEnabled] = useState(false);
 
-            <div className="flex items-center justify-between gap-4">
-                <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className={classNames(
-                            "text-sm font-medium transition-colors duration-200",
-                            isDark ? "text-gray-300" : "text-gray-700"
-                        )}>
-                            Precision Level
-                        </span>
-                        <span className={classNames(
-                            "text-sm transition-colors duration-200",
-                            isDark ? "text-gray-400" : "text-gray-600"
-                        )}>
-                            {precision}
-                        </span>
-                    </div>
-                    <input
-                        type="range"
-                        min={3}
-                        max={8}
-                        step={1}
-                        value={precision}
-                        onChange={(e) => setPrecision(parseInt(e.target.value))}
-                        className="w-full accent-[#5296dd]"
-                    />
-                    <p className={classNames(
-                        "text-xs mt-1 transition-colors duration-200",
-                        isDark ? "text-gray-500" : "text-gray-500"
-                    )}>
-                        Lower = broader area, Higher = more precise
-                    </p>
-                </div>
+  useEffect(() => {
+    if (!locationEnabled && removeLocation) {
+      removeLocation();
+    }
+  }, [locationEnabled, removeLocation]);
 
-                <div className="flex flex-col items-end gap-2">
-                    <button
-                        onClick={updateLocation}
-                        disabled={loading}
-                        className={classNames(
-                            "inline-flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-medium transition-all duration-200",
-                            "bg-gradient-to-r from-[#5296dd] to-[#92bddf] text-white hover:shadow-lg hover:scale-105",
-                            "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                        )}
-                    >
-                        <MapPinIcon className="size-4" />
-                        {loading ? "Updating..." : "Update Location"}
-                    </button>
-                    {geoError && (
-                        <p className="text-xs text-red-500">{geoError}</p>
-                    )}
-                    <p className={classNames(
-                        "text-xs transition-colors duration-200",
-                        isDark ? "text-gray-400" : "text-gray-600"
-                    )}>
-                        {friends.length} friends nearby
-                    </p>
-                </div>
-            </div>
-        </section>
-    );
+  // Toggle handler
+  const handleToggle = async (enabled: boolean) => {
+    setLocationEnabled(enabled);
+    if (enabled) {
+      updateLocation();
+    } else if (removeLocation) {
+      removeLocation();
+    }
+  };
+
+  return (
+    <section
+      className={classNames(
+        "rounded-2xl border p-6 transition-all duration-200 w-full",
+        isDark ? "border-gray-800 bg-gray-900/50 backdrop-blur-sm" : "border-gray-200 bg-white"
+      )}
+    >
+      <div className="flex flex-col gap-4 w-full">
+        {/* Description */}
+        <p
+          className={classNames(
+            "text-sm transition-colors duration-200",
+            isDark ? "text-gray-400" : "text-gray-600"
+          )}
+        >
+          Find friends nearby with location sharing
+        </p>
+
+        {/* Toggle Switch */}
+        <div className="flex items-center justify-between">
+          <span
+            className={classNames(
+              "text-sm font-medium",
+              isDark ? "text-white" : "text-gray-900"
+            )}
+          >
+            Location Sharing
+          </span>
+          <Switch
+            checked={locationEnabled}
+            onChange={handleToggle}
+            disabled={loading}
+            className={classNames(
+              locationEnabled
+                ? "bg-blue-600"
+                : isDark
+                ? "bg-gray-700"
+                : "bg-gray-300",
+              "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none",
+              loading && "opacity-50 cursor-not-allowed"
+            )}
+          >
+            <span
+              className={classNames(
+                locationEnabled ? "translate-x-6" : "translate-x-1",
+                "inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+              )}
+            />
+          </Switch>
+        </div>
+
+        {/* Geo Error Message */}
+        {geoError && <p className="text-xs text-red-500">{geoError}</p>}
+
+        {/* Friends Nearby Count */}
+        <p
+          className={classNames(
+            "text-xs transition-colors duration-200",
+            isDark ? "text-gray-400" : "text-gray-600"
+          )}
+        >
+          {friends.length} friends nearby
+        </p>
+      </div>
+    </section>
+  );
 };
 
 export default MapControls;
