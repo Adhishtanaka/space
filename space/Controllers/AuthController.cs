@@ -64,7 +64,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("geohash")]
-    public async Task<IActionResult> UpdateGeohash([FromQuery] string geohash)
+    public async Task<IActionResult> UpdateGeohash([FromQuery] string? geohash)
     {
         var userId = GetCurrentUserId();
         if (userId == null)
@@ -78,13 +78,13 @@ public class AuthController : ControllerBase
     }
 
     [HttpGet("geohash/{hash}")]
-    public async Task<IActionResult> GetUserByGeohash(string hash, [FromQuery] int precision = 5)
+    public async Task<IActionResult> GetUserByGeohash(string hash)
     {
         var userId = GetCurrentUserId();
         if (userId == null)
             return Unauthorized();
 
-        var (success, usergeoDetails, error) = await _authService.GetUsersByGeohashAsync(userId.Value, hash, precision);
+        var (success, usergeoDetails, error) = await _authService.GetUsersByGeohashAsync(userId.Value, hash);
         if (!success)
             return BadRequest(new { message = error });
 

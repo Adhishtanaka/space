@@ -48,6 +48,6 @@ public interface IAuthService
     Task<(bool Success, UserDto? UserDetails, string? ErrorMessage)> GetUserByEmailAsync(string email);
     Task<(bool Success, UserDto? UserDetails, string? ErrorMessage)> GetUserByIdAsync(int userId);
     Task<(bool Success, List<UserDto> Users, string? ErrorMessage)> GetAllUsersAsync();
-    Task<(bool success, string? ErrorMessage)> UpdateGeohashAsync(int userId, string geohash);
-    Task<(bool Success, List<UserGeoDto> Users, string? ErrorMessage)> GetUsersByGeohashAsync(int excludeUserId ,string geohash, int precision);
+    Task<(bool success, string? ErrorMessage)> UpdateGeohashAsync(int userId, string? geohash);
+    Task<(bool Success, List<UserGeoDto> Users, string ErrorMessage)> GetUsersByGeohashAsync(int excludeUserId ,string? geohash);
 }
