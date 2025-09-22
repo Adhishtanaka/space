@@ -12,6 +12,7 @@ import Linkify from "linkify-react";
 import { useMemo, useState, useCallback, memo } from "react";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import '@mariusbongarts/previewbox/dist';
+import { Link } from "react-router";
 
 function classNames(...classes: (string | false | undefined)[]) {
     return classes.filter(Boolean).join(" ");
@@ -198,6 +199,7 @@ function PostComponent({
                     {post.userFirstName?.[0] || "?"}
                 </div>
                 <div className="flex-1">
+                    <Link to={`/profile/${post.id}`} style={{ textDecoration: 'none' }}>
                     <div
                         className={classNames(
                             "font-medium transition-colors duration-200",
@@ -206,6 +208,7 @@ function PostComponent({
                     >
                         {post.userFirstName} {post.userLastName}
                     </div>
+                    </Link>
                     <div className="text-sm text-gray-500">
                         {new Date(post.createdAt).toLocaleString()}
                     </div>

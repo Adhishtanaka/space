@@ -1,5 +1,5 @@
 import { UsersIcon } from "@heroicons/react/24/solid";
-import { UserPlusIcon } from "@heroicons/react/24/outline";
+import { Link } from "react-router";
 import type { FollowUser } from "../lib/types";
 
 function classNames(...classes: (string | false | undefined)[]) {
@@ -71,8 +71,18 @@ export default function SuggestedSidebar({
                                 )}
                                 title="Hide Suggested Users"
                             >
-                                <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                <svg
+                                    className="size-4"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M6 18L18 6M6 6l12 12"
+                                    />
                                 </svg>
                             </button>
                         </div>
@@ -90,33 +100,28 @@ export default function SuggestedSidebar({
                         ) : (
                             <ul className="space-y-3">
                                 {suggested.map((user) => (
-                                    <li key={user.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50/50 transition-colors duration-150">
-                                        <div className="size-10 rounded-full bg-gradient-to-br from-[#5296dd] to-[#92bddf] text-white flex items-center justify-center font-medium text-sm shadow-lg">
-                                            {user.firstName?.[0]?.toUpperCase() || "?"}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div
-                                                className={classNames(
-                                                    "font-medium text-sm truncate",
-                                                    isDark ? "text-gray-200" : "text-gray-900"
-                                                )}
-                                            >
-                                                {user.firstName} {user.lastName}
-                                            </div>
-                                            <div className="text-xs text-gray-500 truncate">
-                                                {user.email}
-                                            </div>
-                                        </div>
-                                        <button
-                                            className={classNames(
-                                                "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium transition-all duration-200",
-                                                "bg-gradient-to-r from-[#5296dd] to-[#92bddf] text-white hover:shadow-lg hover:scale-105 active:scale-95"
-                                            )}
-                                            disabled
+                                    <li key={user.id}>
+                                        <Link
+                                            to={`/profile/${user.id}`}
+                                            className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50/50 transition-colors duration-150 group"
                                         >
-                                            <UserPlusIcon className="size-3.5" />
-                                            Follow
-                                        </button>
+                                            <div className="size-10 rounded-full bg-gradient-to-br from-[#5296dd] to-[#92bddf] text-white flex items-center justify-center font-medium text-sm shadow-lg">
+                                                {user.firstName?.[0]?.toUpperCase() || "?"}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div
+                                                    className={classNames(
+                                                        "font-medium text-sm truncate",
+                                                        isDark ? "text-gray-200" : "text-gray-900"
+                                                    )}
+                                                >
+                                                    {user.firstName} {user.lastName}
+                                                </div>
+                                                <div className="text-xs text-gray-500 truncate">
+                                                    {user.email}
+                                                </div>
+                                            </div>
+                                        </Link>
                                     </li>
                                 ))}
                             </ul>

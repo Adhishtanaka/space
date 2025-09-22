@@ -60,6 +60,7 @@ export interface UserGeo {
   lastName: string;
   email: string;
   Geohash: string;
+  geohash?: string; // Support lowercase variant from API
 }
 
 export interface AuthContextType {
@@ -79,20 +80,21 @@ export interface AuthContextType {
 }
 
 export interface Friend {
-    id: string | number;
-    name: string;
-    lat: number;
-    lng: number;
+  id: string | number;
+  name: string;
+  email:string;
+  lat: number;
+  lng: number;
 }
 
 export interface MapViewProps {
-    mounted: boolean;
-    activeTheme: string;
-    tileConfig: { attribution: string; url: string };
-    center: { lat: number; lng: number };
-    mapRef: React.MutableRefObject<L.Map | null>;
-    hasLocation: boolean;
-    user: { firstName?: string } | null;
-    friends: Friend[];
-    isDark: boolean;
+  mounted: boolean;
+  activeTheme: string;
+  tileConfig: { attribution: string; url: string };
+  center: { lat: number; lng: number };
+  mapRef: React.MutableRefObject<L.Map | null>;
+  hasLocation: boolean;
+  user: { firstName?: string } | null;
+  friends: Friend[];
+  isDark: boolean;
 }
