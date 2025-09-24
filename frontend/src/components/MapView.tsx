@@ -12,13 +12,17 @@ const TileLayer = lazy(() => import("react-leaflet").then(m => ({ default: m.Til
 const Marker = lazy(() => import("react-leaflet").then(m => ({ default: m.Marker })));
 const Popup = lazy(() => import("react-leaflet").then(m => ({ default: m.Popup })));
 
-const createCustomMarker = (firstLetter: string) => {
+const createCustomMarker = (firstLetter: string, gender: string) => {
+    const gradient = gender === "F"
+        ? "linear-gradient(135deg, #f687b3 0%, #ec4899 100%)" 
+        : "linear-gradient(135deg, #5296dd 0%, #92bddf 100%)";  
+
     const iconHtml = `
         <div style="
             width: 32px;
             height: 32px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #5296dd 0%, #92bddf 100%);
+            background: ${gradient};
             color: white;
             display: flex;
             align-items: center;
@@ -31,6 +35,7 @@ const createCustomMarker = (firstLetter: string) => {
             ${firstLetter || 'U'}
         </div>
     `;
+
     return L.divIcon({
         html: iconHtml,
         className: '', // Remove default class
@@ -39,6 +44,7 @@ const createCustomMarker = (firstLetter: string) => {
         popupAnchor: [0, -32],
     });
 };
+
 
 const MapView: React.FC<MapViewProps> = ({
     mounted,
@@ -77,7 +83,7 @@ const MapView: React.FC<MapViewProps> = ({
                         {hasLocation && (
                             <Marker
                                 position={[center.lat, center.lng]}
-                                icon={createCustomMarker(user?.firstName?.[0] || "Y")}
+                                icon={createCustomMarker(user?.firstName?.[0] || "U" , user?.gender || "M")}
                             >
                                 <Popup>
                                     <div className="text-sm">
@@ -92,11 +98,11 @@ const MapView: React.FC<MapViewProps> = ({
                             <Marker
                                 key={f.id}
                                 position={[f.lat, f.lng]}
-                                icon={createCustomMarker(f.name?.[0] || "F")}
+                                icon={createCustomMarker(f.name?.[0] || "U",f.gender)}
                             >
                                 <Popup>
                                     <div
-                                        className="text-sm cursor-pointer hover:bg-gray-100 p-2 rounded transition"
+                                        className="text-sm cursor-pointer hover:bg-gray-100 rounded transition"
                                     >
                                         <Link to={`/profile/${f.id}`}>
                                         <p className="font-medium">{f.name}</p>

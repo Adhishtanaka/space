@@ -105,9 +105,17 @@ export default function SuggestedSidebar({
                                             to={`/profile/${user.id}`}
                                             className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50/50 transition-colors duration-150 group"
                                         >
-                                            <div className="size-10 rounded-full bg-gradient-to-br from-[#5296dd] to-[#92bddf] text-white flex items-center justify-center font-medium text-sm shadow-lg">
-                                                {user.firstName?.[0]?.toUpperCase() || "?"}
-                                            </div>
+<div
+  className={classNames(
+    "size-10 rounded-full text-white flex items-center justify-center font-medium text-sm shadow-lg",
+    user.gender === "F"
+      ? "bg-gradient-to-br from-pink-400 to-pink-600"
+      : "bg-gradient-to-br from-[#5296dd] to-[#92bddf]"
+  )}
+>
+  {user.firstName?.[0]?.toUpperCase() || "?"}
+</div>
+
                                             <div className="flex-1 min-w-0">
                                                 <div
                                                     className={classNames(

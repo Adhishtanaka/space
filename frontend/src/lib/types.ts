@@ -5,6 +5,7 @@ export interface User {
   email: string;
   phoneNumber: string;
   dateOfBirth: string;
+  gender: string;
 }
 
 export interface CreatePostProps {
@@ -28,8 +29,10 @@ export interface Post {
   id: number;
   content: string;
   createdAt: string;
+  userId: number;
   userFirstName: string;
   userLastName: string;
+  userGender: string;
   upVotes: number;
   downVotes: number;
   totalScore: number;
@@ -41,6 +44,13 @@ export interface FollowUser {
   firstName: string;
   lastName: string;
   email: string;
+  gender: string;
+}
+
+export interface EnhancedUserResponse {
+  user: User;
+  followers: FollowUser[] | null;
+  following: FollowUser[] | null;
 }
 
 export interface LoginResponse {
@@ -52,6 +62,7 @@ export interface AuthUser {
   firstName: string;
   lastName: string;
   email: string;
+  gender: string;
 }
 
 export interface UserGeo {
@@ -59,8 +70,8 @@ export interface UserGeo {
   firstName: string;
   lastName: string;
   email: string;
-  Geohash: string;
-  geohash?: string; // Support lowercase variant from API
+  geohash?: string;
+  gender: string; 
 }
 
 export interface AuthContextType {
@@ -75,6 +86,7 @@ export interface AuthContextType {
     phoneNumber: string;
     dateOfBirth: string;
     password: string;
+    gender: string;
   }) => Promise<void>;
   logout: () => void;
 }
@@ -82,9 +94,18 @@ export interface AuthContextType {
 export interface Friend {
   id: string | number;
   name: string;
+  gender: string;
   email:string;
   lat: number;
   lng: number;
+}
+
+export interface MapControlsProps {
+  updateLocation: () => void;
+  loading: boolean;
+  geoError: string | null;
+  friends: Array<{ id: string | number; name: string; lat: number; lng: number }>;
+  isDark: boolean;
 }
 
 export interface MapViewProps {
@@ -94,7 +115,23 @@ export interface MapViewProps {
   center: { lat: number; lng: number };
   mapRef: React.MutableRefObject<L.Map | null>;
   hasLocation: boolean;
-  user: { firstName?: string } | null;
+  user: { firstName?: string,gender?:string } | null;
   friends: Friend[];
   isDark: boolean;
+}
+
+export interface PostVoteDto {
+    userFirstName: string;
+    userLastName: string;
+    userEmail: string;
+    userGender: string;
+    voteType: string;
+}
+
+export interface VotesModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    postId: number;
+    token: string;
+    isDark: boolean;
 }

@@ -46,6 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 firstName: u.firstName,
                 lastName: u.lastName,
                 email: u.email,
+                gender:u.gender
             });
         } finally {
             setLoading(false);
@@ -60,6 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             phoneNumber: string;
             dateOfBirth: string;
             password: string;
+            gender: string;
         }) => {
             setLoading(true);
             try {

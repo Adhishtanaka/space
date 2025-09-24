@@ -55,16 +55,6 @@ export default function Home() {
         }
     }, [isDark]);
 
-    const removeLocation = async () => {
-                if (token) {
-                    try {
-                        await api.updateGeohash("", token);
-                    } catch (e) {
-                        console.warn('Failed to update geohash:', e);
-                    }
-                }    
-    };
-
         const updateLocation = () => {
         if (!("geolocation" in navigator)) {
             setGeoError("Geolocation not supported");
@@ -77,16 +67,13 @@ export default function Home() {
                 const lat = pos.coords.latitude;
                 const lng = pos.coords.longitude;
                 setCenter({ lat, lng });
-                setHasLocation(true); // User has shared location
+                setHasLocation(true); 
                 setGeoError(null);
                 setLoading(false);
-
-                // Update geohash on backend
                 if (token) {
                     try {
                         const hash = ngeohash.encode(lat, lng);
-                        await api.updateGeohash(hash, token);
-                        const users = await api.getNearbyUsers(hash, token);
+                        const users = await api.updateGeoAndgetNearby(hash, token);
                         setNearbyUsers(users);
                     } catch (e) {
                         console.warn('Failed to update geohash:', e);
@@ -105,11 +92,11 @@ export default function Home() {
         if (nearbyUsers && nearbyUsers.length > 0) {
             return nearbyUsers
                 .filter(u => {
-                    const gh = u.Geohash || u.geohash;
+                    const gh = u.geohash;
                     return typeof gh === 'string' && gh.length > 0;
                 })
                 .map((u, i) => {
-                    const gh = u.Geohash || u.geohash;
+                    const gh = u.geohash;
                     const { latitude, longitude } = ngeohash.decode(gh as string);
 
                     return {
@@ -118,6 +105,7 @@ export default function Home() {
                         email: u.email,
                         lat: latitude,
                         lng: longitude,
+                        gender:u.gender
                     };
                 });
         }
@@ -128,7 +116,7 @@ export default function Home() {
     useEffect(() => {
         if (hasLocation && center && token) {
             const hash = ngeohash.encode(center.lat, center.lng);
-            api.getNearbyUsers(hash, token)
+            api.updateGeoAndgetNearby(hash, token)
                 .then(setNearbyUsers)
                 .catch(() => { });
         }
@@ -178,7 +166,6 @@ export default function Home() {
             <div className="mx-auto max-w-2xl px-4 py-8 space-y-6">
                 <MapControls
                     updateLocation={updateLocation}
-                    removeLocation={removeLocation}
                     loading={loading}
                     geoError={geoError}
                     friends={friends}

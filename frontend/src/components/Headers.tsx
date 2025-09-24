@@ -124,9 +124,17 @@ export default function Header() {
                   ? "hover:bg-gray-800"
                   : "hover:bg-gray-100"
               )}>
-                <div className="size-8 rounded-full bg-gradient-to-br from-[#5296dd] to-[#92bddf] text-white grid place-items-center font-medium text-sm">
-                  {user.firstName?.[0] || <UserIcon className="size-4" />}
-                </div>
+<div
+  className={classNames(
+    "size-8 rounded-full text-white grid place-items-center font-medium text-sm",
+    user.gender === "F"
+      ? "bg-gradient-to-br from-pink-400 to-pink-600"
+      : "bg-gradient-to-br from-[#5296dd] to-[#92bddf]"
+  )}
+>
+  {user.firstName?.[0] || <UserIcon className="size-4" />}
+</div>
+
                 <span className={classNames(
                   "hidden sm:block text-sm font-medium transition-colors duration-200",
                   isDark ? "text-gray-300" : "text-gray-700"

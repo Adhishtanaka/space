@@ -26,6 +26,7 @@ export default function Register() {
     phoneNumber: "",
     dateOfBirth: "",
     password: "",
+    gender: ""
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -78,8 +79,8 @@ export default function Register() {
         {/* Form Card */}
         <div className={classNames(
           "rounded-2xl border p-8 transition-all duration-200 shadow-lg",
-          isDark 
-            ? "border-gray-800 bg-gray-900/50 backdrop-blur-sm" 
+          isDark
+            ? "border-gray-800 bg-gray-900/50 backdrop-blur-sm"
             : "border-gray-200 bg-white"
         )}>
           {error && (
@@ -107,8 +108,8 @@ export default function Register() {
                     className={classNames(
                       "w-full rounded-xl border px-10 py-3 outline-none transition-all duration-200",
                       "focus:ring-2 focus:ring-[#5296dd] focus:border-[#5296dd]",
-                      isDark 
-                        ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400" 
+                      isDark
+                        ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400"
                         : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
                     )}
                     placeholder="John"
@@ -131,8 +132,8 @@ export default function Register() {
                     className={classNames(
                       "w-full rounded-xl border px-10 py-3 outline-none transition-all duration-200",
                       "focus:ring-2 focus:ring-[#5296dd] focus:border-[#5296dd]",
-                      isDark 
-                        ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400" 
+                      isDark
+                        ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400"
                         : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
                     )}
                     placeholder="Doe"
@@ -159,8 +160,8 @@ export default function Register() {
                   className={classNames(
                     "w-full rounded-xl border px-10 py-3 outline-none transition-all duration-200",
                     "focus:ring-2 focus:ring-[#5296dd] focus:border-[#5296dd]",
-                    isDark 
-                      ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400" 
+                    isDark
+                      ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400"
                       : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
                   )}
                   placeholder="you@example.com"
@@ -186,13 +187,38 @@ export default function Register() {
                   className={classNames(
                     "w-full rounded-xl border px-10 py-3 outline-none transition-all duration-200",
                     "focus:ring-2 focus:ring-[#5296dd] focus:border-[#5296dd]",
-                    isDark 
-                      ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400" 
+                    isDark
+                      ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400"
                       : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
                   )}
                   placeholder="+1234567890"
                 />
               </div>
+            </div>
+            {/* Gender */}
+            <div>
+              <label className={classNames(
+                "block text-sm font-medium mb-2 transition-colors duration-200",
+                isDark ? "text-gray-300" : "text-gray-700"
+              )}>
+                Gender
+              </label>
+              <select
+                value={form.gender}
+                onChange={(e) => update("gender", e.target.value)}
+                required
+                className={classNames(
+                  "w-full rounded-xl border px-3 py-3 outline-none transition-all duration-200",
+                  "focus:ring-2 focus:ring-[#5296dd] focus:border-[#5296dd]",
+                  isDark
+                    ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400"
+                    : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
+                )}
+              >
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
             </div>
 
             {/* Date of Birth */}
@@ -213,8 +239,8 @@ export default function Register() {
                   className={classNames(
                     "w-full rounded-xl border px-10 py-3 outline-none transition-all duration-200",
                     "focus:ring-2 focus:ring-[#5296dd] focus:border-[#5296dd]",
-                    isDark 
-                      ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400" 
+                    isDark
+                      ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400"
                       : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
                   )}
                 />
@@ -239,8 +265,8 @@ export default function Register() {
                   className={classNames(
                     "w-full rounded-xl border px-10 py-3 outline-none transition-all duration-200",
                     "focus:ring-2 focus:ring-[#5296dd] focus:border-[#5296dd]",
-                    isDark 
-                      ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400" 
+                    isDark
+                      ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400"
                       : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
                   )}
                   placeholder="••••••••"
@@ -277,8 +303,8 @@ export default function Register() {
           isDark ? "text-gray-400" : "text-gray-600"
         )}>
           Already have an account?{" "}
-          <Link 
-            className="text-[#5296dd] hover:underline font-medium transition-colors duration-200" 
+          <Link
+            className="text-[#5296dd] hover:underline font-medium transition-colors duration-200"
             to="/login"
           >
             Sign in

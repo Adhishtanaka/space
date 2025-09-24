@@ -8,6 +8,7 @@ public class User
     public DateTime DateOfBirth { get; set; }
     public string PasswordHash { get; set; } = null!;
     public string? Geohash { get; set; }
+    public string Gender { get; set; } = null!;
 
     // Navigation properties
     public ICollection<Post> Posts { get; set; } = [];
@@ -15,3 +16,4 @@ public class User
     public ICollection<UserFollow> Following { get; set; } = [];
     public ICollection<UserFollow> Followers { get; set; } = [];
 }
+
