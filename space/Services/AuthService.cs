@@ -18,6 +18,11 @@ public class AuthService : IAuthService
         if (await _db.Users.AnyAsync(u => u.Email == request.Email))
             return (false, "Email already in use");
 
+        if (request.Gender.ToUpper() != "F" && request.Gender.ToUpper() != "M")
+        {
+            return (false, "wrong gender value");
+        }
+
         var user = new User
         {
             FirstName = request.FirstName,
@@ -25,8 +30,10 @@ public class AuthService : IAuthService
             Email = request.Email,
             PhoneNumber = request.PhoneNumber,
             DateOfBirth = request.DateOfBirth,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            Gender = request.Gender.ToUpper()
         };
+
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
@@ -55,8 +62,8 @@ public class AuthService : IAuthService
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
             DateOfBirth = user.DateOfBirth,
+            Gender = user.Gender
         };
 
         return (true, userDto, null);
@@ -74,8 +81,8 @@ public class AuthService : IAuthService
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
             DateOfBirth = user.DateOfBirth,
+            Gender = user.Gender,
         };
 
         return (true, userDto, null);
@@ -90,42 +97,10 @@ public class AuthService : IAuthService
             FirstName = user.FirstName,
             LastName = user.LastName,
             Email = user.Email,
-            PhoneNumber = user.PhoneNumber,
             DateOfBirth = user.DateOfBirth,
+            Gender = user.Gender,
         }).ToList();
         return (true, userDtos, null);
     }
-
-    public async Task<(bool success, string? ErrorMessage)> UpdateGeohashAsync(int userId, string? geohash)
-    {
-        var user = await _db.Users.FindAsync(userId);
-        if (user == null)
-            return (false, "User not found");
-
-        user.Geohash = string.IsNullOrWhiteSpace(geohash) ? null : geohash;
-        await _db.SaveChangesAsync();
-        return (true, null);
-    }
-
-public async Task<(bool Success, List<UserGeoDto> Users, string? ErrorMessage)> GetUsersByGeohashAsync(
-     int excludeUserId,string geohash)
-{
-    string geohashPrefix = geohash.Substring(0, 5);
-
-    var users = await _db.Users
-        .Where(u => u.Geohash.StartsWith(geohashPrefix) && u.Id != excludeUserId)
-        .ToListAsync();
-
-    var userGeoDtos = users.Select(user => new UserGeoDto
-    {
-        Id = user.Id,
-        FirstName = user.FirstName,
-        LastName = user.LastName,
-        Email = user.Email,
-        Geohash = user.Geohash.Substring(0,5)
-    }).ToList();
-
-    return (true, userGeoDtos, null);
-}
 
 }

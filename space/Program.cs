@@ -20,6 +20,7 @@ builder.Services.AddSingleton<JwtConfig>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IFollowService, FollowService>();
+builder.Services.AddScoped<IGeoService, GeoService>();
 
 builder.Services.AddCors(options =>
 {
