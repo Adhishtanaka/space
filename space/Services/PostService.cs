@@ -2,21 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
 
-public class UpdatePostRequest
-{
-    public string Content { get; set; } = string.Empty;
-}
-
-public interface IPostService
-{
-    Task<(bool Success, PostDto? Post, string? ErrorMessage)> CreatePostAsync(int userId, CreatePostRequest request);
-    Task<(bool Success, List<PostDto> Posts, string? ErrorMessage)> GetFeedAsync(int userId);
-    Task<(bool Success, List<PostDto> Posts, string? ErrorMessage)> GetUserPostsAsync(int userId, int currentUserId);
-    Task<(bool Success, string? ErrorMessage)> VoteAsync(int userId, VoteRequest request);
-    Task<(bool Success, string? ErrorMessage)> RemoveVoteAsync(int userId, int postId);
-    Task<(bool Success, string? ErrorMessage)> DeletePostAsync(int userId, int postId);
-    Task<(bool Success, PostDto? Post, string? ErrorMessage)> UpdatePostAsync(int userId, int postId, UpdatePostRequest request);
-}
 public class PostService : IPostService
 {
     private readonly AppDbContext _db;
@@ -47,7 +32,6 @@ public class PostService : IPostService
         _db.Posts.Add(post);
         await _db.SaveChangesAsync();
 
-        // Load the post with user data for DTO conversion
         var createdPost = await _db.Posts
             .Include(p => p.User)
             .Include(p => p.Votes)
@@ -117,13 +101,12 @@ public class PostService : IPostService
 
     public async Task<(bool Success, List<PostDto> Posts, string? ErrorMessage)> GetFeedAsync(int userId)
     {
-        // Get posts from followed users and own posts
         var followedUserIds = await _db.UserFollows
             .Where(uf => uf.FollowerId == userId)
             .Select(uf => uf.FollowedId)
             .ToListAsync();
 
-        followedUserIds.Add(userId); // Include own posts
+        followedUserIds.Add(userId);
 
         var posts = await _db.Posts
             .Include(p => p.User)
@@ -140,6 +123,7 @@ public class PostService : IPostService
             UserId = p.UserId,
             UserFirstName = p.User.FirstName,
             UserLastName = p.User.LastName,
+            UserGender = p.User.Gender,
             UpVotes = p.UpVotes,
             DownVotes = p.DownVotes,
             TotalScore = p.TotalScore,
@@ -166,6 +150,7 @@ public class PostService : IPostService
             UserId = p.UserId,
             UserFirstName = p.User.FirstName,
             UserLastName = p.User.LastName,
+            UserGender = p.User.Gender,
             UpVotes = p.UpVotes,
             DownVotes = p.DownVotes,
             TotalScore = p.TotalScore,
@@ -186,12 +171,10 @@ public class PostService : IPostService
 
         if (existingVote != null)
         {
-            // Update existing vote
             existingVote.IsUpVote = request.IsUpVote;
         }
         else
         {
-            // Create new vote
             var vote = new Vote
             {
                 UserId = userId,
@@ -226,7 +209,6 @@ public class PostService : IPostService
         if (post.UserId != userId)
             return (false, "You are not authorized to delete this post");
 
-        // Remove votes associated with the post
         _db.Votes.RemoveRange(post.Votes);
         _db.Posts.Remove(post);
         await _db.SaveChangesAsync();
@@ -238,4 +220,25 @@ public class PostService : IPostService
         var userVote = votes.FirstOrDefault(v => v.UserId == userId);
         return userVote?.IsUpVote;
     }
-}
+    
+   public async Task<(bool Success, List<PostVoteDto> Votes, string? ErrorMessage)> GetPostVotesAsync(int postId)
+{
+    var post = await _db.Posts.FindAsync(postId);
+    if (post == null)
+        return (false, new List<PostVoteDto>(), "Post not found");
+
+    var votes = await _db.Votes
+        .Include(v => v.User)
+        .Where(v => v.PostId == postId)
+        .Select(v => new PostVoteDto
+        {
+            UserFirstName = v.User.FirstName,
+            UserLastName = v.User.LastName,
+            UserEmail = v.User.Email,
+            UserGender = v.User.Gender,
+            VoteType = v.IsUpVote ? "UpVote" : "DownVote"
+        })
+        .ToListAsync();
+
+    return (true, votes, null);
+}}

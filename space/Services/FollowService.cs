@@ -21,14 +21,12 @@ public class FollowService : IFollowService
         if (follower == null || followed == null)
             return (false, "User not found");
 
-        // Check if already following
         var existingFollow = await _db.UserFollows
             .FirstOrDefaultAsync(uf => uf.FollowerId == followerId && uf.FollowedId == followedId);
 
         if (existingFollow != null)
             return (false, "Already following this user");
 
-        // Check follow limit
         var currentFollowCount = await _db.UserFollows
             .CountAsync(uf => uf.FollowerId == followerId);
 
@@ -81,7 +79,7 @@ public class FollowService : IFollowService
                 FirstName = follower.FirstName,
                 LastName = follower.LastName,
                 Email = follower.Email,
-                IsFollowing = false, // They are following the current user, not the other way around
+                IsFollowing = false, 
                 FollowersCount = followersCount,
                 FollowingCount = followingCount
             });
@@ -121,17 +119,15 @@ public class FollowService : IFollowService
 
     public async Task<(bool Success, List<UserFollowDto> Users, string? ErrorMessage)> GetSuggestedUsersAsync(int userId)
     {
-        // Get users that the current user is not following (excluding themselves)
         var followingIds = await _db.UserFollows
             .Where(uf => uf.FollowerId == userId)
             .Select(uf => uf.FollowedId)
             .ToListAsync();
 
-        followingIds.Add(userId); // Exclude self
-
+        followingIds.Add(userId); 
         var suggestedUsers = await _db.Users
             .Where(u => !followingIds.Contains(u.Id))
-            .Take(20) // Limit suggestions
+            .Take(20) 
             .ToListAsync();
 
         var suggestedUserDtos = new List<UserFollowDto>();
@@ -146,6 +142,7 @@ public class FollowService : IFollowService
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
+                Gender = user.Gender,
                 IsFollowing = false,
                 FollowersCount = followersCount,
                 FollowingCount = followingCount
@@ -155,8 +152,4 @@ public class FollowService : IFollowService
         return (true, suggestedUserDtos, null);
     }
 
-    public async Task<bool> IsFollowingAsync(int followerId, int followedId)
-{
-    return await _db.UserFollows.AnyAsync(uf => uf.FollowerId == followerId && uf.FollowedId == followedId);
-}
 }

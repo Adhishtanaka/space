@@ -11,10 +11,12 @@ public class PostDto
     public int UserId { get; set; }
     public string UserFirstName { get; set; } = null!;
     public string UserLastName { get; set; } = null!;
+
+    public string UserGender { get; set; } = null!;
     public int UpVotes { get; set; }
     public int DownVotes { get; set; }
     public int TotalScore { get; set; }
-    public bool? CurrentUserVote { get; set; } // null = no vote, true = upvote, false = downvote
+    public bool? CurrentUserVote { get; set; }
 }
 
 public class VoteRequest
@@ -23,29 +25,29 @@ public class VoteRequest
     public bool IsUpVote { get; set; }
 }
 
-public class FollowRequest
+public class UpdatePostRequest
 {
-    public int UserId { get; set; }
+    public string Content { get; set; } = string.Empty;
 }
 
-public class UserFollowDto
+public class PostVoteDto
 {
-    public int Id { get; set; }
-    public string FirstName { get; set; } = null!;
-    public string LastName { get; set; } = null!;
-    public string Email { get; set; } = null!;
-    public bool IsFollowing { get; set; }
-    public int FollowersCount { get; set; }
-    public int FollowingCount { get; set; }
+    public string UserFirstName { get; set; } = null!;
+    public string UserLastName { get; set; } = null!;
+    public string UserEmail { get; set; } = null!;
+    public string UserGender { get; set; } = null!;
+    public string VoteType { get; set; } = null!; // "UpVote" or "DownVote"
 }
 
-public interface IFollowService
+public interface IPostService
 {
-    Task<(bool Success, string? ErrorMessage)> FollowUserAsync(int followerId, int followedId);
-    Task<(bool Success, string? ErrorMessage)> UnfollowUserAsync(int followerId, int followedId);
-    Task<(bool Success, List<UserFollowDto> Users, string? ErrorMessage)> GetFollowersAsync(int userId);
-    Task<(bool Success, List<UserFollowDto> Users, string? ErrorMessage)> GetFollowingAsync(int userId);
-    Task<(bool Success, List<UserFollowDto> Users, string? ErrorMessage)> GetSuggestedUsersAsync(int userId);
+    Task<(bool Success, PostDto? Post, string? ErrorMessage)> CreatePostAsync(int userId, CreatePostRequest request);
+    Task<(bool Success, List<PostDto> Posts, string? ErrorMessage)> GetFeedAsync(int userId);
+    Task<(bool Success, List<PostDto> Posts, string? ErrorMessage)> GetUserPostsAsync(int userId, int currentUserId);
+    Task<(bool Success, string? ErrorMessage)> VoteAsync(int userId, VoteRequest request);
+    Task<(bool Success, string? ErrorMessage)> RemoveVoteAsync(int userId, int postId);
+    Task<(bool Success, string? ErrorMessage)> DeletePostAsync(int userId, int postId);
+    Task<(bool Success, PostDto? Post, string? ErrorMessage)> UpdatePostAsync(int userId, int postId, UpdatePostRequest request);
 
-    Task<bool> IsFollowingAsync(int followerId, int followedId);
+    Task<(bool Success, List<PostVoteDto> Votes, string? ErrorMessage)> GetPostVotesAsync(int postId);
 }

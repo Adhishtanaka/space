@@ -11,6 +11,7 @@ import { api } from "../lib/api";
 import Linkify from "linkify-react";
 import { useMemo, useState, useCallback, memo } from "react";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
+import VotesModal from "./VotesModal";
 import '@mariusbongarts/previewbox/dist';
 import { Link } from "react-router";
 
@@ -33,6 +34,7 @@ function PostComponent({
     const [isUpdating, setIsUpdating] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showVotesModal, setShowVotesModal] = useState(false);
 
     const handleVote = useCallback(async (isUp: boolean) => {
         if (!token) return;
@@ -140,7 +142,6 @@ function PostComponent({
         }
     }, [token, post.id, onPostDelete]);
 
-
     // Extract URLs for preview and embed
     const urls = useMemo(() => {
         const content = isEditing ? editContent : post.content;
@@ -195,19 +196,27 @@ function PostComponent({
         >
             {/* Post Header */}
             <div className="mb-4 flex items-center gap-3">
-                <div className="size-10 rounded-full bg-gradient-to-br from-[#5296dd] to-[#92bddf] text-white grid place-items-center font-medium">
+                <div
+                    className={classNames(
+                        "size-10 rounded-full text-white grid place-items-center font-medium",
+                        post.userGender === "F"
+                            ? "bg-gradient-to-br from-pink-400 to-pink-600"
+                            : "bg-gradient-to-br from-[#5296dd] to-[#92bddf]"
+                    )}
+                >
                     {post.userFirstName?.[0] || "?"}
                 </div>
+
                 <div className="flex-1">
-                    <Link to={`/profile/${post.id}`} style={{ textDecoration: 'none' }}>
-                    <div
-                        className={classNames(
-                            "font-medium transition-colors duration-200",
-                            isDark ? "text-gray-200" : "text-gray-900"
-                        )}
-                    >
-                        {post.userFirstName} {post.userLastName}
-                    </div>
+                    <Link to={`/profile/${post.userId}`} style={{ textDecoration: 'none' }}>
+                        <div
+                            className={classNames(
+                                "font-medium transition-colors duration-200",
+                                isDark ? "text-gray-200" : "text-gray-900"
+                            )}
+                        >
+                            {post.userFirstName} {post.userLastName}
+                        </div>
                     </Link>
                     <div className="text-sm text-gray-500">
                         {new Date(post.createdAt).toLocaleString()}
@@ -358,44 +367,61 @@ function PostComponent({
 
             {/* Post Actions */}
             {!isEditing && (
-                <div className="flex items-center gap-4 pt-3 border-t border-gray-200 dark:border-gray-800">
-                    <button
-                        onClick={() => handleVote(true)}
-                        className={classNames(
-                            "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                            post.currentUserVote === true
-                                ? "text-[#5296dd] bg-[#5296dd]/10"
-                                : isDark
-                                    ? "text-gray-400 hover:text-gray-200 hover:bg-gray-800"
-                                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                        )}
-                    >
-                        {post.currentUserVote === true ? (
-                            <HandThumbUpIcon className="size-4" />
-                        ) : (
-                            <HandThumbUpOutline className="size-4" />
-                        )}
-                        {post.upVotes}
-                    </button>
+                <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-800">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => handleVote(true)}
+                            className={classNames(
+                                "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                                post.currentUserVote === true
+                                    ? "text-[#5296dd] bg-[#5296dd]/10"
+                                    : isDark
+                                        ? "text-gray-400 hover:text-gray-200 hover:bg-gray-800"
+                                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                            )}
+                        >
+                            {post.currentUserVote === true ? (
+                                <HandThumbUpIcon className="size-4" />
+                            ) : (
+                                <HandThumbUpOutline className="size-4" />
+                            )}
+                            {post.upVotes}
+                        </button>
 
-                    <button
-                        onClick={() => handleVote(false)}
-                        className={classNames(
-                            "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
-                            post.currentUserVote === false
-                                ? "text-red-500 bg-red-50 dark:bg-red-900/20"
-                                : isDark
+                        <button
+                            onClick={() => handleVote(false)}
+                            className={classNames(
+                                "inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200",
+                                post.currentUserVote === false
+                                    ? "text-red-500 bg-red-50 dark:bg-red-900/20"
+                                    : isDark
+                                        ? "text-gray-400 hover:text-gray-200 hover:bg-gray-800"
+                                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                            )}
+                        >
+                            {post.currentUserVote === false ? (
+                                <HandThumbDownIcon className="size-4" />
+                            ) : (
+                                <HandThumbDownOutline className="size-4" />
+                            )}
+                            {post.downVotes}
+                        </button>
+                    </div>
+
+                    {/* Show votes button - only show if there are votes */}
+                    {(post.upVotes > 0 || post.downVotes > 0) && (
+                        <button
+                            onClick={() => setShowVotesModal(true)}
+                            className={classNames(
+                                "text-xs px-3 py-1.5 rounded-full transition-colors font-medium",
+                                isDark
                                     ? "text-gray-400 hover:text-gray-200 hover:bg-gray-800"
-                                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-                        )}
-                    >
-                        {post.currentUserVote === false ? (
-                            <HandThumbDownIcon className="size-4" />
-                        ) : (
-                            <HandThumbDownOutline className="size-4" />
-                        )}
-                        {post.downVotes}
-                    </button>
+                                    : "text-gray-500 hover:text-gray-700 hover:bg-gray-100"
+                            )}
+                        >
+                            {post.upVotes + post.downVotes} {post.upVotes + post.downVotes === 1 ? 'vote' : 'votes'}
+                        </button>
+                    )}
                 </div>
             )}
 
@@ -406,6 +432,7 @@ function PostComponent({
                     onClick={() => setShowMenu(false)}
                 />
             )}
+
             {/* Delete Confirmation Modal */}
             <ConfirmDeleteModal
                 open={showDeleteModal}
@@ -413,6 +440,17 @@ function PostComponent({
                 onConfirm={handleDelete}
                 isDark={isDark}
             />
+
+            {/* Votes Modal */}
+            {token && (
+                <VotesModal
+                    isOpen={showVotesModal}
+                    onClose={() => setShowVotesModal(false)}
+                    postId={post.id}
+                    token={token}
+                    isDark={isDark}
+                />
+            )}
         </article>
     );
 }

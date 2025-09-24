@@ -1,5 +1,5 @@
 import axios, { type AxiosRequestConfig } from "axios";
-import type { User, Post, FollowUser, LoginResponse, UserGeo } from "./types";
+import type { User, Post, FollowUser, LoginResponse, UserGeo, EnhancedUserResponse, PostVoteDto } from "./types";
 
 const BASE_URL = "http://localhost:5106";
 
@@ -53,6 +53,7 @@ export const api = {
         phoneNumber: string;
         dateOfBirth: string;
         password: string;
+        gender: string;
     }) =>
         request<void>("/api/auth/register", {
             method: "POST",
@@ -73,7 +74,7 @@ export const api = {
         ),
 
     getUserById: (userId: number, token: string) =>
-        request<User>(`/api/auth/user/${userId}`, { method: "GET" }, token),
+        request<EnhancedUserResponse>(`/api/auth/user/${userId}`, { method: "GET" }, token),
 
     getAllUsers: (token: string) =>
         request<User[]>(`/api/auth/users`, { method: "GET" }, token),
@@ -126,26 +127,6 @@ export const api = {
     suggestUsers: (token: string) =>
         request<FollowUser[]>(`/api/follow/suggested`, { method: "GET" }, token),
 
-    isFollowing: (userId: number, token: string) =>
-        request<{ isFollowing: boolean }>(
-            `/api/follow/is-following/${userId}`,
-            { method: "GET" },
-            token
-        ),
-
-    userFollowers: (userId: number, token: string) =>
-        request<FollowUser[]>(
-            `/api/follow/followers/${userId}`,
-            { method: "GET" },
-            token
-        ),
-
-    userFollowing: (userId: number, token: string) =>
-        request<FollowUser[]>(
-            `/api/follow/following/${userId}`,
-            { method: "GET" },
-            token
-        ),
     updatePost: (postId: number, content: string, token: string) =>
         request<Post>(
             `/api/post/${postId}`,
@@ -156,17 +137,13 @@ export const api = {
     deletePost: (postId: number, token: string) =>
         request<void>(`/api/post/${postId}`, { method: "DELETE" }, token),
 
-    updateGeohash: (geohash: string, token: string) =>
-        request<void>(
-            `/api/Auth/geohash?geohash=${encodeURIComponent(geohash)}`,
+    updateGeoAndgetNearby: (geohash: string, token: string) =>
+        request<UserGeo[]>(
+            `/api/Geo/geohash?geohash=${encodeURIComponent(geohash)}`,
             { method: "POST" },
             token
         ),
 
-    getNearbyUsers: (hash: string, token: string) =>
-        request<UserGeo[]>(
-            `/api/Auth/geohash/${encodeURIComponent(hash)}`,
-            { method: "GET" },
-            token
-        ),
+    getPostVotes: (postId: number, token: string) =>
+        request<PostVoteDto[]>(`/api/post/votes/${postId}`, { method: "GET" }, token),
 };

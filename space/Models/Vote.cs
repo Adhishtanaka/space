@@ -5,6 +5,6 @@ public class Vote
     public User User { get; set; } = null!;
     public int PostId { get; set; }
     public Post Post { get; set; } = null!;
-    public bool IsUpVote { get; set; } // true for upvote, false for downvote
+    public bool IsUpVote { get; set; } 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }

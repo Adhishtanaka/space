@@ -5,6 +5,7 @@ import { useTheme } from "../lib/useTheme";
 import { api } from "../lib/api";
 import type { Post, FollowUser, User } from "../lib/types";
 import PostComponent from "../components/Post";
+import FollowersModal from "../components/FollowersModal";
 import {
     UserPlusIcon,
     UserMinusIcon,
@@ -28,6 +29,10 @@ export default function Profile() {
     const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
     const [userDetails, setUserDetails] = useState<User | null>(null);
     const [followLoading, setFollowLoading] = useState(false);
+    
+    // Modal states
+    const [showFollowersModal, setShowFollowersModal] = useState(false);
+    const [showFollowingModal, setShowFollowingModal] = useState(false);
 
     const isOwn = useMemo(() => user?.id === userId, [user?.id, userId]);
 
@@ -39,18 +44,18 @@ export default function Profile() {
         async function load() {
             if (!token) return;
             try {
-                const [p, f1, f2, f3] = await Promise.all([
+                const [posts, userResponse] = await Promise.all([
                     api.getUserPosts(userId, token),
-                    api.userFollowers(userId, token),
-                    api.userFollowing(userId, token),
-                    api.getUserById(userId, token)
+                    api.getUserById(userId, token) 
                 ]);
-                setPosts(p);
-                setFollowers(f1);
-                setFollowing(f2);
-                setUserDetails(f3);
-                const s = await api.isFollowing(userId, token);
-                setIsFollowing(s.isFollowing);
+
+                setPosts(posts);
+                setUserDetails(userResponse.user);
+                setFollowers(userResponse.followers || []);
+                setFollowing(userResponse.following || []);
+
+                const followStatus = followers?.some(follower => follower.id === user?.id) || false;
+                setIsFollowing(followStatus);
             } catch (err: unknown) {
                 console.error("Failed to load profile:", (err as Error)?.message);
             }
@@ -69,13 +74,12 @@ export default function Profile() {
                 await api.follow(userId, token);
                 setIsFollowing(true);
             }
-            // Refresh counts
-            const [f1, f2] = await Promise.all([
-                api.userFollowers(userId, token),
-                api.userFollowing(userId, token),
-            ]);
-            setFollowers(f1);
-            setFollowing(f2);
+           const [userResponse] = await Promise.all([
+                    api.getUserById(userId, token) 
+                ]);
+                setUserDetails(userResponse.user);
+                setFollowers(userResponse.followers || []);
+                setFollowing(userResponse.following || []);
         } catch (err: unknown) {
             console.error("Failed to toggle follow:", (err as Error)?.message);
         } finally {
@@ -99,7 +103,14 @@ export default function Profile() {
                     <div className="flex items-start justify-between">
                         <div className="flex items-start gap-4">
                             {/* Avatar */}
-                            <div className="size-20 rounded-2xl bg-gradient-to-br from-[#5296dd] to-[#92bddf] text-white grid place-items-center text-2xl font-bold shadow-lg">
+                            <div
+                                className={classNames(
+                                    "size-20 rounded-2xl text-white grid place-items-center text-2xl font-bold shadow-lg",
+                                    userDetails?.gender === "F"
+                                        ? "bg-gradient-to-br from-pink-400 to-pink-600"
+                                        : "bg-gradient-to-br from-[#5296dd] to-[#92bddf]"
+                                )}
+                            >
                                 {userDetails?.firstName?.[0] || <UserIcon className="size-8" />}
                             </div>
 
@@ -117,29 +128,32 @@ export default function Profile() {
                                     {userDetails && (
                                         <p className="text-sm text-gray-500 mt-1">
                                             {userDetails.email}
-                                            {userDetails.phoneNumber && (
-                                                <span> • {userDetails.phoneNumber}</span>
-                                            )}
                                         </p>
                                     )}
                                 </div>
 
-                                {/* Stats */}
+                                {/* Stats - Now clickable */}
                                 <div className="flex items-center gap-6 text-sm">
-                                    <div className={classNames(
-                                        "transition-colors duration-200",
-                                        isDark ? "text-gray-300" : "text-gray-600"
-                                    )}>
+                                    <button
+                                        onClick={() => setShowFollowersModal(true)}
+                                        className={classNames(
+                                            "transition-colors duration-200 hover:opacity-75",
+                                            isDark ? "text-gray-300" : "text-gray-600"
+                                        )}
+                                    >
                                         <span className="font-semibold text-lg">{followers.length}</span>
                                         <span className="ml-1">Followers</span>
-                                    </div>
-                                    <div className={classNames(
-                                        "transition-colors duration-200",
-                                        isDark ? "text-gray-300" : "text-gray-600"
-                                    )}>
+                                    </button>
+                                    <button
+                                        onClick={() => setShowFollowingModal(true)}
+                                        className={classNames(
+                                            "transition-colors duration-200 hover:opacity-75",
+                                            isDark ? "text-gray-300" : "text-gray-600"
+                                        )}
+                                    >
                                         <span className="font-semibold text-lg">{following.length}</span>
                                         <span className="ml-1">Following</span>
-                                    </div>
+                                    </button>
                                     <div className={classNames(
                                         "transition-colors duration-200",
                                         isDark ? "text-gray-300" : "text-gray-600"
@@ -218,6 +232,24 @@ export default function Profile() {
                     )}
                 </section>
             </div>
+
+            {/* Followers Modal */}
+            <FollowersModal
+                isOpen={showFollowersModal}
+                onClose={() => setShowFollowersModal(false)}
+                users={followers}
+                title="Followers"
+                isDark={isDark}
+            />
+
+            {/* Following Modal */}
+            <FollowersModal
+                isOpen={showFollowingModal}
+                onClose={() => setShowFollowingModal(false)}
+                users={following}
+                title="Following"
+                isDark={isDark}
+            />
         </div>
     );
 }

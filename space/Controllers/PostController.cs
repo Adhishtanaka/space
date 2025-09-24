@@ -70,6 +70,18 @@ public class PostController : ControllerBase
         return Ok(posts);
     }
 
+    [HttpGet("votes/{postId}")]
+    public async Task<IActionResult> GetPostVotes(int postId)
+    {
+        var (success, votes, error) = await _postService.GetPostVotesAsync(postId);
+
+        if (!success)
+            return BadRequest(new { message = error });
+
+        return Ok(votes);
+    }
+
+
     [HttpPost("vote")]
     public async Task<IActionResult> Vote([FromBody] VoteRequest request)
     {

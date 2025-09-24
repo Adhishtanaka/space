@@ -6,10 +6,13 @@ using System.Security.Claims;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly IAuthService _authService;
-    public AuthController(IAuthService authService)
+   private readonly IAuthService _authService;
+    private readonly IFollowService _followService;
+    
+    public AuthController(IAuthService authService, IFollowService followService)
     {
         _authService = authService;
+        _followService = followService;
     }
 
     [HttpPost("register")]
@@ -30,7 +33,7 @@ public class AuthController : ControllerBase
         return Ok(new AuthResponse { Token = token! });
     }
 
-    [HttpGet("user/{id}")]
+[HttpGet("user/{id}")]
     public async Task<IActionResult> GetUserById(int id)
     {
         var (success, userDetails, error) = await _authService.GetUserByIdAsync(id);
@@ -38,7 +41,26 @@ public class AuthController : ControllerBase
         {
             return NotFound(new { message = error ?? "User not found" });
         }
-        return Ok(userDetails);
+        
+        var (followersSuccess, followers, followersError) = await _followService.GetFollowersAsync(id);
+        var (followingSuccess, following, followingError) = await _followService.GetFollowingAsync(id);
+        if (!followersSuccess && followersError != null)
+        {
+            return BadRequest(new { message = followersError });
+        }
+        if (!followingSuccess && followingError != null)
+        {
+            return BadRequest(new { message = followingError });
+        }
+        var enhancedUserData = new
+        {
+            User = userDetails,
+            Followers = followersSuccess ? followers : null,
+            Following = followingSuccess ? following : null,
+
+        };
+
+        return Ok(enhancedUserData);
     }
 
     [HttpGet("user")]
@@ -61,40 +83,5 @@ public class AuthController : ControllerBase
             return BadRequest(new { message = error ?? "Failed to retrieve users" });
         }
         return Ok(users);
-    }
-
-    [HttpPost("geohash")]
-    public async Task<IActionResult> UpdateGeohash([FromQuery] string? geohash)
-    {
-        var userId = GetCurrentUserId();
-        if (userId == null)
-            return Unauthorized();
-
-        var (success, error) = await _authService.UpdateGeohashAsync(userId.Value, geohash);
-        if (!success)
-            return BadRequest(new { message = error });
-
-        return Ok(new { message = "Geohash updated successfully" });
-    }
-
-    [HttpGet("geohash/{hash}")]
-    public async Task<IActionResult> GetUserByGeohash(string hash)
-    {
-        var userId = GetCurrentUserId();
-        if (userId == null)
-            return Unauthorized();
-
-        var (success, usergeoDetails, error) = await _authService.GetUsersByGeohashAsync(userId.Value, hash);
-        if (!success)
-            return BadRequest(new { message = error });
-
-        return Ok(usergeoDetails);
-    }
-
-
-    private int? GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        return int.TryParse(userIdClaim, out var userId) ? userId : null;
     }
 }

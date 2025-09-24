@@ -84,37 +84,6 @@ public class FollowController : ControllerBase
         return Ok(suggested);
     }
 
-    [HttpGet("followers/{userId}")]
-    public async Task<IActionResult> GetUserFollowers(int userId)
-    {
-        var (success, followers, error) = await _followService.GetFollowersAsync(userId);
-        if (!success)
-            return BadRequest(new { message = error });
-
-        return Ok(followers);
-    }
-
-    [HttpGet("following/{userId}")]
-    public async Task<IActionResult> GetUserFollowing(int userId)
-    {
-        var (success, following, error) = await _followService.GetFollowingAsync(userId);
-        if (!success)
-            return BadRequest(new { message = error });
-
-        return Ok(following);
-    }
-
-    [HttpGet("is-following/{userId}")]
-    public async Task<IActionResult> IsFollowing(int userId)
-    {
-        var currentUserId = GetCurrentUserId();
-        if (currentUserId == null)
-            return Unauthorized();
-
-        var isFollowing = await _followService.IsFollowingAsync(currentUserId.Value, userId);
-        return Ok(new { isFollowing });
-    }
-
     private int? GetCurrentUserId()
     {
         var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
