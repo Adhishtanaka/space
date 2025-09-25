@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router";
-import { useAuth } from "../lib/useAuth";
-import { useTheme } from "../lib/useTheme";
+import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme";
 import { LockClosedIcon, AtSymbolIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 
 function classNames(...classes: (string | false | undefined)[]) {
@@ -55,8 +55,8 @@ export default function Login() {
         {/* Form Card */}
         <div className={classNames(
           "rounded-2xl border p-8 transition-all duration-200 shadow-lg",
-          isDark 
-            ? "border-gray-800 bg-gray-900/50 backdrop-blur-sm" 
+          isDark
+            ? "border-gray-800 bg-gray-900/50 backdrop-blur-sm"
             : "border-gray-200 bg-white"
         )}>
           {error && (
@@ -83,8 +83,8 @@ export default function Login() {
                   className={classNames(
                     "w-full rounded-xl border px-10 py-3 outline-none transition-all duration-200",
                     "focus:ring-2 focus:ring-[#5296dd] focus:border-[#5296dd]",
-                    isDark 
-                      ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400" 
+                    isDark
+                      ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400"
                       : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
                   )}
                   placeholder="you@example.com"
@@ -109,8 +109,8 @@ export default function Login() {
                   className={classNames(
                     "w-full rounded-xl border px-10 py-3 outline-none transition-all duration-200",
                     "focus:ring-2 focus:ring-[#5296dd] focus:border-[#5296dd]",
-                    isDark 
-                      ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400" 
+                    isDark
+                      ? "border-gray-700 bg-gray-800 text-gray-100 placeholder-gray-400"
                       : "border-gray-300 bg-white text-gray-900 placeholder-gray-500"
                   )}
                   placeholder="••••••••"
@@ -146,8 +146,8 @@ export default function Login() {
           isDark ? "text-gray-400" : "text-gray-600"
         )}>
           New to Space?{" "}
-          <Link 
-            className="text-[#5296dd] hover:underline font-medium transition-colors duration-200" 
+          <Link
+            className="text-[#5296dd] hover:underline font-medium transition-colors duration-200"
             to="/register"
           >
             Create an account

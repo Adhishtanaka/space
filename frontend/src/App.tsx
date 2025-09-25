@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import Header from "./components/Headers";
 import Footer from "./components/Footer";
 import { AuthProvider } from "./lib/auth";
-import { useTheme } from "./lib/useTheme";
+import { useTheme } from "./hooks/useTheme";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import Register from "./pages/register";

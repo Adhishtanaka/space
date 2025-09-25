@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, Link } from "react-router";
-import { useAuth } from "../lib/useAuth";
-import { useTheme } from "../lib/useTheme";
+import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme";
 
 function classNames(...classes: (string | false | undefined)[]) {
     return classes.filter(Boolean).join(" ");

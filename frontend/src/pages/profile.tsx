@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate } from "react-router";
-import { useAuth } from "../lib/useAuth";
-import { useTheme } from "../lib/useTheme";
+import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme";
 import { api } from "../lib/api";
-import type { Post, FollowUser, User } from "../lib/types";
+import type { FollowUser, User } from "../types/user";
+import type { Post } from "../types/post";
 import PostComponent from "../components/Post";
 import FollowersModal from "../components/FollowersModal";
 import {
@@ -29,7 +30,7 @@ export default function Profile() {
     const [isFollowing, setIsFollowing] = useState<boolean | null>(null);
     const [userDetails, setUserDetails] = useState<User | null>(null);
     const [followLoading, setFollowLoading] = useState(false);
-    
+
     // Modal states
     const [showFollowersModal, setShowFollowersModal] = useState(false);
     const [showFollowingModal, setShowFollowingModal] = useState(false);
@@ -46,7 +47,7 @@ export default function Profile() {
             try {
                 const [posts, userResponse] = await Promise.all([
                     api.getUserPosts(userId, token),
-                    api.getUserById(userId, token) 
+                    api.getUserById(userId, token)
                 ]);
 
                 setPosts(posts);
@@ -74,12 +75,12 @@ export default function Profile() {
                 await api.follow(userId, token);
                 setIsFollowing(true);
             }
-           const [userResponse] = await Promise.all([
-                    api.getUserById(userId, token) 
-                ]);
-                setUserDetails(userResponse.user);
-                setFollowers(userResponse.followers || []);
-                setFollowing(userResponse.following || []);
+            const [userResponse] = await Promise.all([
+                api.getUserById(userId, token)
+            ]);
+            setUserDetails(userResponse.user);
+            setFollowers(userResponse.followers || []);
+            setFollowing(userResponse.following || []);
         } catch (err: unknown) {
             console.error("Failed to toggle follow:", (err as Error)?.message);
         } finally {

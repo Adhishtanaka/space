@@ -2,7 +2,7 @@ import { useState } from "react";
 import { SparklesIcon, PaperAirplaneIcon } from "@heroicons/react/24/solid";
 import DOMPurify from "dompurify";
 import { api } from "../lib/api";
-import type { CreatePostProps } from "../lib/types";
+import type { CreatePostProps } from "../types/post";
 import CharacterCounter from "./CharacterCounter";
 
 function classNames(...classes: (string | false | undefined)[]) {

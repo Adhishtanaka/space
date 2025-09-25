@@ -1,6 +1,6 @@
 import { UsersIcon } from "@heroicons/react/24/solid";
 import { Link } from "react-router";
-import type { FollowUser } from "../lib/types";
+import type { FollowUser } from "../types/user";
 
 function classNames(...classes: (string | false | undefined)[]) {
     return classes.filter(Boolean).join(" ");

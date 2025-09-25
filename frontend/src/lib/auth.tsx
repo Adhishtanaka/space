@@ -5,8 +5,7 @@ import {
     useState,
 } from "react";
 import { api } from "./api";
-import type { AuthUser, LoginResponse } from "./types";
-// useAuth hook moved to useAuth.ts for react-refresh compliance
+import type { AuthUser, LoginResponse } from "../types/auth";
 
 import { AuthContext } from "./AuthContext";
 

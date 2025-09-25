@@ -6,7 +6,7 @@ import {
     PencilIcon,
     TrashIcon,
 } from "@heroicons/react/24/outline";
-import type { PostProps } from "../lib/types";
+import type { PostProps } from "../types/post";
 import { api } from "../lib/api";
 import Linkify from "linkify-react";
 import { useMemo, useState, useCallback, memo } from "react";

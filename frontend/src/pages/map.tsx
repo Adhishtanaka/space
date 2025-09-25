@@ -3,12 +3,12 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import ngeohash from "ngeohash";
 import { api } from "../lib/api";
-import { useAuth } from "../lib/useAuth";
-import { useTheme } from "../lib/useTheme";
+import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme";
 
 import MapControls from "../components/MapControls";
 import MapView from "../components/MapView";
-import type { UserGeo } from "../lib/types";
+import type { UserGeo } from "../types/Geo";
 
 
 L.Icon.Default.mergeOptions({
@@ -55,7 +55,7 @@ export default function Home() {
         }
     }, [isDark]);
 
-        const updateLocation = () => {
+    const updateLocation = () => {
         if (!("geolocation" in navigator)) {
             setGeoError("Geolocation not supported");
             return;
@@ -67,7 +67,7 @@ export default function Home() {
                 const lat = pos.coords.latitude;
                 const lng = pos.coords.longitude;
                 setCenter({ lat, lng });
-                setHasLocation(true); 
+                setHasLocation(true);
                 setGeoError(null);
                 setLoading(false);
                 if (token) {
@@ -105,7 +105,7 @@ export default function Home() {
                         email: u.email,
                         lat: latitude,
                         lng: longitude,
-                        gender:u.gender
+                        gender: u.gender
                     };
                 });
         }

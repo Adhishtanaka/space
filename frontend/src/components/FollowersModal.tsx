@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, UserIcon } from '@heroicons/react/24/outline';
-import type { FollowUser } from '../lib/types';
+import type { FollowUser } from '../types/user';
 
 interface FollowersModalProps {
   isOpen: boolean;

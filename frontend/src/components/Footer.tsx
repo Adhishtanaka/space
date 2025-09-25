@@ -1,4 +1,4 @@
-import { useTheme } from "../lib/useTheme";
+import { useTheme } from "../hooks/useTheme";
 
 function classNames(...classes: (string | false | undefined)[]) {
     return classes.filter(Boolean).join(" ");

@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { useAuth } from "../lib/useAuth";
-import { useTheme } from "../lib/useTheme";
+import { useAuth } from "../hooks/useAuth";
+import { useTheme } from "../hooks/useTheme";
 import { api } from "../lib/api";
-import type { FollowUser, Post } from "../lib/types";
+import type { FollowUser } from "../types/user";
+import type {  Post } from "../types/post";
 import { SparklesIcon } from "@heroicons/react/24/solid";
 import SuggestedSidebar from "../components/SuggestedSidebar";
 import PostComponent from "../components/Post";

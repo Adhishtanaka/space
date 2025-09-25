@@ -2,7 +2,7 @@ import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition, Tab } from '@headlessui/react';
 import { XMarkIcon, HandThumbUpIcon, HandThumbDownIcon } from '@heroicons/react/24/outline';
 import { api } from '../lib/api';
-import type { PostVoteDto, VotesModalProps } from '../lib/types';
+import type { PostVoteDto, VotesModalProps } from '../types/post';
 
 function classNames(...classes: (string | false | undefined)[]) {
     return classes.filter(Boolean).join(" ");
@@ -12,7 +12,6 @@ export default function VotesModal({ isOpen, onClose, postId, token, isDark }: V
     const [votes, setVotes] = useState<PostVoteDto[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
     const upVotes = votes.filter(vote => vote.voteType === 'UpVote');
     const downVotes = votes.filter(vote => vote.voteType === 'DownVote');
 

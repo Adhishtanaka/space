@@ -1,6 +1,6 @@
 import React, { lazy } from "react";
 import L from "leaflet";
-import type { MapViewProps } from "../lib/types";
+import type { MapViewProps } from "../types/Geo";
 import { Link } from "react-router";
 
 function classNames(...classes: Array<string | undefined | false>) {

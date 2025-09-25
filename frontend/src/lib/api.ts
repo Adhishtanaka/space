@@ -1,5 +1,8 @@
 import axios, { type AxiosRequestConfig } from "axios";
-import type { User, Post, FollowUser, LoginResponse, UserGeo, EnhancedUserResponse, PostVoteDto } from "./types";
+import type { LoginResponse } from "../types/auth";
+import type { Post , PostVoteDto } from "../types/post";
+import type { User, FollowUser ,EnhancedUserResponse} from "../types/user";
+import type { UserGeo } from "../types/Geo";
 
 const BASE_URL = "http://localhost:5106";
 
