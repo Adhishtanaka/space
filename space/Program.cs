@@ -35,7 +35,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("SignalRPolicy", policy =>
     {
         policy
-            .WithOrigins("http://localhost:3000", "https://localhost:3000")
+            .WithOrigins("http://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -63,14 +63,14 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
     };
 
-    // Configure JWT for SignalR
+
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
             var accessToken = context.Request.Query["access_token"];
             var path = context.HttpContext.Request.Path;
-            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/notificationHub") || path.StartsWithSegments("/chatHub")))
             {
                 context.Token = accessToken;
             }
@@ -97,6 +97,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub").RequireCors("SignalRPolicy");
+app.MapHub<ChatHub>("/chatHub").RequireCors("SignalRPolicy");
 
 app.MapGet("/health", () => "API is running");
 

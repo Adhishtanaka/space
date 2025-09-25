@@ -9,11 +9,12 @@ public class User
     public string PasswordHash { get; set; } = null!;
     public string? Geohash { get; set; }
     public string Gender { get; set; } = null!;
+    public ICollection<Post> Posts { get; set; } = new List<Post>();
+    public ICollection<Vote> Votes { get; set; } = new List<Vote>();
+    public ICollection<UserFollow> Following { get; set; } = new List<UserFollow>();
+    public ICollection<UserFollow> Followers { get; set; } = new List<UserFollow>();
+    public ICollection<Message> SentMessages { get; set; } = new List<Message>();
+    public ICollection<Message> ReceivedMessages { get; set; } = new List<Message>();
 
-    // Navigation properties
-    public ICollection<Post> Posts { get; set; } = [];
-    public ICollection<Vote> Votes { get; set; } = [];
-    public ICollection<UserFollow> Following { get; set; } = [];
-    public ICollection<UserFollow> Followers { get; set; } = [];
+    public string? ConnectionId { get; set; }
 }
-

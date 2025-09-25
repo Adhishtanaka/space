@@ -10,6 +10,7 @@ import Register from "./pages/register";
 import Feed from "./pages/feed";
 import Profile from "./pages/profile";
 import MapPage from "./pages/map";
+import MessagePage from "./pages/messages";
 
 function classNames(...classes: (string | false | undefined)[]) {
   return classes.filter(Boolean).join(" ");
@@ -69,6 +70,10 @@ const router = createBrowserRouter([
       {
         path: "map",
         element: <MapPage />, // Assuming MapPage is defined elsewhere
+      },
+      {
+        path: "messages",
+        element: <MessagePage />
       }
     ],
   },

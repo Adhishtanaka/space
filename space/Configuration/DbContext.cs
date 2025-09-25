@@ -7,7 +7,7 @@ public class AppDbContext : DbContext
     public DbSet<Post> Posts { get; set; } = null!;
     public DbSet<Vote> Votes { get; set; } = null!;
     public DbSet<UserFollow> UserFollows { get; set; } = null!;
-
+    public DbSet<Message> Messages { get; set; } = null!;
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -54,5 +54,18 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<UserFollow>()
             .HasIndex(uf => new { uf.FollowerId, uf.FollowedId })
             .IsUnique();
+
+        modelBuilder.Entity<Message>()
+            .HasOne(m => m.Sender)
+            .WithMany(u => u.SentMessages)
+            .HasForeignKey(m => m.SenderId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Message>()
+            .HasOne(m => m.Receiver)
+            .WithMany(u => u.ReceivedMessages)
+            .HasForeignKey(m => m.ReceiverId)
+            .OnDelete(DeleteBehavior.Restrict);
+
     }
 }
