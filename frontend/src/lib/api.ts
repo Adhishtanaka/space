@@ -2,7 +2,7 @@ import axios, { type AxiosRequestConfig } from "axios";
 import type { LoginResponse } from "../types/auth";
 import type { Post , PostVoteDto } from "../types/post";
 import type { User, FollowUser ,EnhancedUserResponse} from "../types/user";
-import type { UserGeo } from "../types/Geo";
+import type { UserGeo } from "../types/geo";
 
 const BASE_URL = "http://localhost:5106";
 

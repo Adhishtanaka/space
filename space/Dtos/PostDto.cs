@@ -15,7 +15,6 @@ public class PostDto
     public string UserGender { get; set; } = null!;
     public int UpVotes { get; set; }
     public int DownVotes { get; set; }
-    public int TotalScore { get; set; }
     public bool? CurrentUserVote { get; set; }
 }
 

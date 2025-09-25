@@ -47,7 +47,6 @@ public class PostService : IPostService
             UserLastName = createdPost.User.LastName,
             UpVotes = createdPost.UpVotes,
             DownVotes = createdPost.DownVotes,
-            TotalScore = createdPost.TotalScore,
             CurrentUserVote = null
         };
 
@@ -91,7 +90,6 @@ public class PostService : IPostService
             UserLastName = post.User.LastName,
             UpVotes = post.UpVotes,
             DownVotes = post.DownVotes,
-            TotalScore = post.TotalScore,
             CurrentUserVote = GetUserVote(post.Votes, userId)
         };
 
@@ -126,7 +124,6 @@ public class PostService : IPostService
             UserGender = p.User.Gender,
             UpVotes = p.UpVotes,
             DownVotes = p.DownVotes,
-            TotalScore = p.TotalScore,
             CurrentUserVote = GetUserVote(p.Votes, userId)
         }).ToList();
 
@@ -153,7 +150,6 @@ public class PostService : IPostService
             UserGender = p.User.Gender,
             UpVotes = p.UpVotes,
             DownVotes = p.DownVotes,
-            TotalScore = p.TotalScore,
             CurrentUserVote = GetUserVote(p.Votes, currentUserId)
         }).ToList();
 

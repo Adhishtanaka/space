@@ -8,7 +8,7 @@ import { useTheme } from "../hooks/useTheme";
 
 import MapControls from "../components/MapControls";
 import MapView from "../components/MapView";
-import type { UserGeo } from "../types/Geo";
+import type { UserGeo } from "../types/geo";
 
 
 L.Icon.Default.mergeOptions({

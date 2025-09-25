@@ -1,6 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react";
 import React, { Fragment, useState } from "react";
-import type { MapControlsProps } from "../types/Geo";
+import type { MapControlsProps } from "../types/geo";
 
 function classNames(...classes: Array<string | undefined | false>) {
   return classes.filter(Boolean).join(" ");

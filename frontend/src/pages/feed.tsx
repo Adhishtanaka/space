@@ -99,8 +99,8 @@ export default function Feed() {
                             [...feed]
                                 .sort(
                                     (a, b) =>
-                                        (b.totalScore ?? 0) -
-                                        (a.totalScore ?? 0)
+                                        (b.upVotes-b.downVotes) -
+                                        (a.upVotes-b.downVotes)
                                 )
                                 .map((post) => (
                                     <PostComponent
