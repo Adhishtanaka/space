@@ -2,6 +2,8 @@
 
 Space is a simple social media platform similar to Reddit with upvote/downvote functionality, but without comments. Users can create posts, vote on them, and follow other users to stay updated with their content.
 
+<img width="600" src="./screenshots/image.png">
+
 ## Features
 
 - **User Authentication**: Secure JWT-based registration and login  
