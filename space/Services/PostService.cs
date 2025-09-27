@@ -1,4 +1,3 @@
-
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
 
@@ -50,21 +49,29 @@ public class PostService : IPostService
             CurrentUserVote = null
         };
 
-        // Send notification to followers
         var followers = await _db.UserFollows
             .Where(uf => uf.FollowedId == userId)
-            .Select(uf => uf.FollowerId.ToString())
+            .Select(uf => uf.FollowerId)
             .ToListAsync();
 
-        if (followers.Any())
+        if (followers.Any() && NotificationThrottler.ShouldNotify())
         {
-            await _hubContext.Clients.Users(followers)
-                .SendAsync("NewPost", postDto);
+            var notification = new
+            {
+                hasNewPost = true,
+                authorName = $"{createdPost.User.FirstName} {createdPost.User.LastName}",
+                timestamp = DateTime.UtcNow
+            };
+
+            foreach (var followerId in followers)
+            {
+                await _hubContext.Clients.User(followerId.ToString())
+                    .SendAsync("NewPostNotification", notification);
+            }
         }
 
         return (true, postDto, null);
     }
-
 
     public async Task<(bool Success, PostDto? Post, string? ErrorMessage)> UpdatePostAsync(int userId, int postId, UpdatePostRequest request)
     {
@@ -95,7 +102,6 @@ public class PostService : IPostService
 
         return (true, postDto, null);
     }
-
 
     public async Task<(bool Success, List<PostDto> Posts, string? ErrorMessage)> GetFeedAsync(int userId)
     {
@@ -217,24 +223,25 @@ public class PostService : IPostService
         return userVote?.IsUpVote;
     }
     
-   public async Task<(bool Success, List<PostVoteDto> Votes, string? ErrorMessage)> GetPostVotesAsync(int postId)
-{
-    var post = await _db.Posts.FindAsync(postId);
-    if (post == null)
-        return (false, new List<PostVoteDto>(), "Post not found");
+    public async Task<(bool Success, List<PostVoteDto> Votes, string? ErrorMessage)> GetPostVotesAsync(int postId)
+    {
+        var post = await _db.Posts.FindAsync(postId);
+        if (post == null)
+            return (false, new List<PostVoteDto>(), "Post not found");
 
-    var votes = await _db.Votes
-        .Include(v => v.User)
-        .Where(v => v.PostId == postId)
-        .Select(v => new PostVoteDto
-        {
-            UserFirstName = v.User.FirstName,
-            UserLastName = v.User.LastName,
-            UserEmail = v.User.Email,
-            UserGender = v.User.Gender,
-            VoteType = v.IsUpVote ? "UpVote" : "DownVote"
-        })
-        .ToListAsync();
+        var votes = await _db.Votes
+            .Include(v => v.User)
+            .Where(v => v.PostId == postId)
+            .Select(v => new PostVoteDto
+            {
+                UserFirstName = v.User.FirstName,
+                UserLastName = v.User.LastName,
+                UserEmail = v.User.Email,
+                UserGender = v.User.Gender,
+                VoteType = v.IsUpVote ? "UpVote" : "DownVote"
+            })
+            .ToListAsync();
 
-    return (true, votes, null);
-}}
+        return (true, votes, null);
+    }
+}

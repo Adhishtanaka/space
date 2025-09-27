@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Conversation, MessageDto } from "../types/message";
 import { useTheme } from "../hooks/useTheme";
-import { SignalHubService } from "../lib/signalHub";
+import { SignalHubService } from "../lib/ChatsignalHub";
 import { MessageContactSidebar } from "../components/MessageContactSidebar";
 import { MessageView } from "../components/MessageView";
 
@@ -35,7 +35,6 @@ export default function MessagePage() {
         setError(null);
         setHubService(service);
 
-        // Set up event handlers
         service.onReceiveMessage((msg: MessageDto) => {
           setMessages((prev) => {
             const belongsToCurrentChat = currentChat && 

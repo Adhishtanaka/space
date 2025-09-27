@@ -1,6 +1,3 @@
-using System;
-using System.Threading;
-
 public static class NotificationThrottler
 {
     private static DateTime _lastNotification = DateTime.MinValue;
