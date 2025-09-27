@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Conversation, MessageDto } from "../types/message";
 import { useTheme } from "../hooks/useTheme";
-import { SignalHubService } from "../lib/ChatsignalHub";
+import { SignalHubService } from "../lib/ChatSignalHub";
 import { MessageContactSidebar } from "../components/MessageContactSidebar";
 import { MessageView } from "../components/MessageView";
 
