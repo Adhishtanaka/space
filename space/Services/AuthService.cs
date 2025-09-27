@@ -1,7 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 
-using System.Security.Claims;
-
 public class AuthService : IAuthService
 {
     private readonly AppDbContext _db;
