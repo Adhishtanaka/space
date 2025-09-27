@@ -4,87 +4,15 @@ Space is a simple social media platform similar to Reddit with upvote/downvote f
 
 ## Features
 
-- **User Authentication**: Secure JWT-based registration and login
-- **Post Creation**: Create and share text-based posts
-- **Voting System**: Upvote/downvote posts with real-time score calculation
-- **Following System**: Follow up to 50 users to curate your feed
-- **Real-time Notifications**: SignalR integration for instant updates
-- **Personalized Feed**: See posts from users you follow plus your own content
-
-## System Architecture
-
-```mermaid
-graph TB
-    Client[Client Application] --> API[Space API]
-    API --> Auth[Authentication Service]
-    API --> PostService[Post Service]
-    API --> FollowService[Follow Service]
-    API --> VoteService[Vote Service]
-    API --> SignalR[SignalR Hub]
-    
-    Auth --> DB[(Database)]
-    PostService --> DB
-    FollowService --> DB
-    VoteService --> DB
-    
-    SignalR --> Client
-    
-    subgraph "Authentication Flow"
-        Auth --> JWT[JWT Token Generation]
-        JWT --> Client
-    end
-    
-    subgraph "Real-time Features"
-        SignalR --> Notifications[Push Notifications]
-        Notifications --> Followers[Follower Updates]
-    end
-```
-
-## Database Structure
-
-```mermaid
-erDiagram
-    User {
-        int Id PK
-        string FirstName
-        string LastName
-        string Email UK
-        string PhoneNumber
-        datetime DateOfBirth
-        string PasswordHash
-    }
-    
-    Post {
-        int Id PK
-        string Content
-        datetime CreatedAt
-        int UserId FK
-    }
-    
-    Vote {
-        int Id PK
-        int UserId FK
-        int PostId FK
-        bool IsUpVote
-        datetime CreatedAt
-    }
-    
-    UserFollow {
-        int Id PK
-        int FollowerId FK
-        int FollowedId FK
-        datetime CreatedAt
-    }
-    
-    User ||--o{ Post : "creates"
-    User ||--o{ Vote : "votes"
-    User ||--o{ UserFollow : "follows (as follower)"
-    User ||--o{ UserFollow : "followed by (as followed)"
-    Post ||--o{ Vote : "receives"
-    
-    User }|--|| UserFollow : "follower"
-    User }|--|| UserFollow : "followed"
-```
+- **User Authentication**: Secure JWT-based registration and login  
+- **Post Creation**: Create and share text-based posts  
+- **Voting System**: Upvote/downvote posts with real-time score calculation  
+- **Following System**: Follow up to 50 users to curate your feed  
+- **Personalized Feed**: See posts from users you follow plus your own content  
+- **Real-time Notifications**: SignalR/WebSocket integration for instant post and system updates  
+- **Post Notifications**: Get notified instantly when someone you follow creates a new post  
+- **Chat Functionality**: Real-time one-to-one and group conversations over WebSockets  
+- **User Map**: See nearby users on a map with 1 km accuracy for privacy protection
 
 ## Technology Stack
 
@@ -98,7 +26,7 @@ erDiagram
 
 ### Prerequisites
 - .NET 8.0 or later
-- SQL Server or SQL Server Express
+- Postgres SQL Server
 - Visual Studio 2022 or VS Code
 
 ### Installation
@@ -115,7 +43,13 @@ erDiagram
    {
      "ConnectionStrings": {
        "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=SpaceDb;Trusted_Connection=true;MultipleActiveResultSets=true"
-     }
+     },
+         "JwtSettings": {
+    "Key": "YourSuperSecretKeyHere12345", 
+    "Issuer": "YourAppName",
+    "Audience": "YourAppNameUsers",
+    "ExpiryMinutes": 60
+  },
    }
    ```
 
