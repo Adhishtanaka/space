@@ -46,12 +46,12 @@ Space is a simple social media platform similar to Reddit with upvote/downvote f
      "ConnectionStrings": {
        "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=SpaceDb;Trusted_Connection=true;MultipleActiveResultSets=true"
      },
-         "JwtSettings": {
-    "Key": "YourSuperSecretKeyHere12345", 
-    "Issuer": "YourAppName",
-    "Audience": "YourAppNameUsers",
-    "ExpiryMinutes": 60
-  },
+     "JwtSettings": {
+     "Key": "YourSuperSecretKeyHere12345", 
+     "Issuer": "YourAppName",
+     "Audience": "YourAppNameUsers",
+     "ExpiryMinutes": 60
+     },
    }
    ```
 
