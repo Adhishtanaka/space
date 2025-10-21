@@ -1,19 +1,19 @@
-using Microsoft.EntityFrameworkCore;
+using space.Repositories;
 
 public class AuthService : IAuthService
 {
-    private readonly AppDbContext _db;
+    private readonly IUserRepository _userRepository;
     private readonly JwtConfig _jwtConfig;
 
-    public AuthService(AppDbContext db, JwtConfig jwtConfig)
+    public AuthService(IUserRepository userRepository, JwtConfig jwtConfig)
     {
-        _db = db;
+        _userRepository = userRepository;
         _jwtConfig = jwtConfig;
     }
 
     public async Task<(bool Success, string? ErrorMessage)> RegisterAsync(RegisterRequest request)
     {
-        if (await _db.Users.AnyAsync(u => u.Email == request.Email))
+        if (await _userRepository.ExistsByEmailAsync(request.Email))
             return (false, "Email already in use");
 
         if (request.Gender.ToUpper() != "F" && request.Gender.ToUpper() != "M")
@@ -32,15 +32,14 @@ public class AuthService : IAuthService
             Gender = request.Gender.ToUpper()
         };
 
-
-        _db.Users.Add(user);
-        await _db.SaveChangesAsync();
+        await _userRepository.AddAsync(user);
+        await _userRepository.SaveChangesAsync();
         return (true, null);
     }
 
     public async Task<(bool Success, string? Token, string? ErrorMessage)> LoginAsync(LoginRequest request)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == request.Email);
+        var user = await _userRepository.GetByEmailAsync(request.Email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             return (false, null, "Invalid credentials");
 
@@ -50,7 +49,7 @@ public class AuthService : IAuthService
 
     public async Task<(bool Success, UserDto? UserDetails, string? ErrorMessage)> GetUserByEmailAsync(string email)
     {
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+        var user = await _userRepository.GetByEmailAsync(email);
         if (user == null)
             return (false, null, "User not found");
 
@@ -69,7 +68,7 @@ public class AuthService : IAuthService
 
     public async Task<(bool Success, UserDto? UserDetails, string? ErrorMessage)> GetUserByIdAsync(int userId)
     {
-        var user = await _db.Users.FindAsync(userId);
+        var user = await _userRepository.GetByIdAsync(userId);
         if (user == null)
             return (false, null, "User not found");
 
@@ -88,7 +87,7 @@ public class AuthService : IAuthService
 
     public async Task<(bool Success, List<UserDto> Users, string? ErrorMessage)> GetAllUsersAsync()
     {
-        var users = await _db.Users.ToListAsync();
+        var users = await _userRepository.GetAllAsync();
         var userDtos = users.Select(user => new UserDto
         {
             Id = user.Id,

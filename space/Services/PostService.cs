@@ -1,14 +1,16 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.SignalR;
+using space.Repositories;
 
 public class PostService : IPostService
 {
-    private readonly AppDbContext _db;
+    private readonly IPostRepository _postRepository;
+    private readonly IFollowRepository _followRepository;
     private readonly IHubContext<NotificationHub> _hubContext;
 
-    public PostService(AppDbContext db, IHubContext<NotificationHub> hubContext)
+    public PostService(IPostRepository postRepository, IFollowRepository followRepository, IHubContext<NotificationHub> hubContext)
     {
-        _db = db;
+        _postRepository = postRepository;
+        _followRepository = followRepository;
         _hubContext = hubContext;
     }
 
@@ -17,10 +19,6 @@ public class PostService : IPostService
         if (string.IsNullOrWhiteSpace(request.Content))
             return (false, null, "Post content cannot be empty");
 
-        var user = await _db.Users.FindAsync(userId);
-        if (user == null)
-            return (false, null, "User not found");
-
         var post = new Post
         {
             Content = request.Content,
@@ -28,17 +26,15 @@ public class PostService : IPostService
             CreatedAt = DateTime.UtcNow
         };
 
-        _db.Posts.Add(post);
-        await _db.SaveChangesAsync();
+        await _postRepository.CreateAsync(post);
+        var createdPost = await _postRepository.GetByIdAsync(post.Id, includeRelations: true);
 
-        var createdPost = await _db.Posts
-            .Include(p => p.User)
-            .Include(p => p.Votes)
-            .FirstOrDefaultAsync(p => p.Id == post.Id);
+        if (createdPost == null)
+            return (false, null, "Failed to create post");
 
         var postDto = new PostDto
         {
-            Id = createdPost!.Id,
+            Id = createdPost.Id,
             Content = createdPost.Content,
             CreatedAt = createdPost.CreatedAt,
             UserId = createdPost.UserId,
@@ -49,10 +45,7 @@ public class PostService : IPostService
             CurrentUserVote = null
         };
 
-        var followers = await _db.UserFollows
-            .Where(uf => uf.FollowedId == userId)
-            .Select(uf => uf.FollowerId)
-            .ToListAsync();
+        var followers = await _followRepository.GetFollowersWithDetailsAsync(userId);
 
         if (followers.Any() && NotificationThrottler.ShouldNotify())
         {
@@ -63,9 +56,9 @@ public class PostService : IPostService
                 timestamp = DateTime.UtcNow
             };
 
-            foreach (var followerId in followers)
+            foreach (var follower in followers)
             {
-                await _hubContext.Clients.User(followerId.ToString())
+                await _hubContext.Clients.User(follower.Id.ToString())
                     .SendAsync("NewPostNotification", notification);
             }
         }
@@ -78,14 +71,14 @@ public class PostService : IPostService
         if (string.IsNullOrWhiteSpace(request.Content))
             return (false, null, "Post content cannot be empty");
 
-        var post = await _db.Posts.Include(p => p.User).Include(p => p.Votes).FirstOrDefaultAsync(p => p.Id == postId);
+        var post = await _postRepository.GetByIdAsync(postId, includeRelations: true);
         if (post == null)
             return (false, null, "Post not found");
         if (post.UserId != userId)
             return (false, null, "You are not authorized to update this post");
 
         post.Content = request.Content;
-        await _db.SaveChangesAsync();
+        await _postRepository.SaveChangesAsync();
 
         var postDto = new PostDto
         {
@@ -105,19 +98,10 @@ public class PostService : IPostService
 
     public async Task<(bool Success, List<PostDto> Posts, string? ErrorMessage)> GetFeedAsync(int userId)
     {
-        var followedUserIds = await _db.UserFollows
-            .Where(uf => uf.FollowerId == userId)
-            .Select(uf => uf.FollowedId)
-            .ToListAsync();
-
+        var followedUserIds = await _followRepository.GetFollowingIdsAsync(userId);
         followedUserIds.Add(userId);
 
-        var posts = await _db.Posts
-            .Include(p => p.User)
-            .Include(p => p.Votes)
-            .Where(p => followedUserIds.Contains(p.UserId))
-            .OrderByDescending(p => p.CreatedAt)
-            .ToListAsync();
+        var posts = await _postRepository.GetFeedPostsAsync(followedUserIds);
 
         var postDtos = posts.Select(p => new PostDto
         {
@@ -138,12 +122,7 @@ public class PostService : IPostService
 
     public async Task<(bool Success, List<PostDto> Posts, string? ErrorMessage)> GetUserPostsAsync(int userId, int currentUserId)
     {
-        var posts = await _db.Posts
-            .Include(p => p.User)
-            .Include(p => p.Votes)
-            .Where(p => p.UserId == userId)
-            .OrderByDescending(p => p.CreatedAt)
-            .ToListAsync();
+        var posts = await _postRepository.GetUserPostsAsync(userId);
 
         var postDtos = posts.Select(p => new PostDto
         {
@@ -164,16 +143,16 @@ public class PostService : IPostService
 
     public async Task<(bool Success, string? ErrorMessage)> VoteAsync(int userId, VoteRequest request)
     {
-        var post = await _db.Posts.FindAsync(request.PostId);
+        var post = await _postRepository.GetByIdAsync(request.PostId);
         if (post == null)
             return (false, "Post not found");
 
-        var existingVote = await _db.Votes
-            .FirstOrDefaultAsync(v => v.UserId == userId && v.PostId == request.PostId);
+        var existingVote = await _postRepository.GetVoteAsync(userId, request.PostId);
 
         if (existingVote != null)
         {
             existingVote.IsUpVote = request.IsUpVote;
+            await _postRepository.UpdateVoteAsync(existingVote);
         }
         else
         {
@@ -183,37 +162,33 @@ public class PostService : IPostService
                 PostId = request.PostId,
                 IsUpVote = request.IsUpVote
             };
-            _db.Votes.Add(vote);
+            await _postRepository.AddVoteAsync(vote);
         }
 
-        await _db.SaveChangesAsync();
         return (true, null);
     }
 
     public async Task<(bool Success, string? ErrorMessage)> RemoveVoteAsync(int userId, int postId)
     {
-        var vote = await _db.Votes
-            .FirstOrDefaultAsync(v => v.UserId == userId && v.PostId == postId);
+        var vote = await _postRepository.GetVoteAsync(userId, postId);
 
         if (vote == null)
             return (false, "Vote not found");
 
-        _db.Votes.Remove(vote);
-        await _db.SaveChangesAsync();
+        await _postRepository.RemoveVoteAsync(vote);
         return (true, null);
     }
 
     public async Task<(bool Success, string? ErrorMessage)> DeletePostAsync(int userId, int postId)
     {
-        var post = await _db.Posts.Include(p => p.Votes).FirstOrDefaultAsync(p => p.Id == postId);
+        var post = await _postRepository.GetByIdAsync(postId, includeRelations: true);
         if (post == null)
             return (false, "Post not found");
         if (post.UserId != userId)
             return (false, "You are not authorized to delete this post");
 
-        _db.Votes.RemoveRange(post.Votes);
-        _db.Posts.Remove(post);
-        await _db.SaveChangesAsync();
+        await _postRepository.DeleteVotesAsync(post.Votes);
+        await _postRepository.DeleteAsync(post);
         return (true, null);
     }
 
@@ -222,26 +197,24 @@ public class PostService : IPostService
         var userVote = votes.FirstOrDefault(v => v.UserId == userId);
         return userVote?.IsUpVote;
     }
-    
+
     public async Task<(bool Success, List<PostVoteDto> Votes, string? ErrorMessage)> GetPostVotesAsync(int postId)
     {
-        var post = await _db.Posts.FindAsync(postId);
+        var post = await _postRepository.GetByIdAsync(postId);
         if (post == null)
             return (false, new List<PostVoteDto>(), "Post not found");
 
-        var votes = await _db.Votes
-            .Include(v => v.User)
-            .Where(v => v.PostId == postId)
-            .Select(v => new PostVoteDto
-            {
-                UserFirstName = v.User.FirstName,
-                UserLastName = v.User.LastName,
-                UserEmail = v.User.Email,
-                UserGender = v.User.Gender,
-                VoteType = v.IsUpVote ? "UpVote" : "DownVote"
-            })
-            .ToListAsync();
+        var votes = await _postRepository.GetPostVotesAsync(postId);
 
-        return (true, votes, null);
+        var voteDtos = votes.Select(v => new PostVoteDto
+        {
+            UserFirstName = v.User.FirstName,
+            UserLastName = v.User.LastName,
+            UserEmail = v.User.Email,
+            UserGender = v.User.Gender,
+            VoteType = v.IsUpVote ? "UpVote" : "DownVote"
+        }).ToList();
+
+        return (true, voteDtos, null);
     }
 }
