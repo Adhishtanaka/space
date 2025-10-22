@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 public interface IGeoRepository
 {
     Task<User?> GetUserByIdAsync(int userId);

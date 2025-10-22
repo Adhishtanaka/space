@@ -1,5 +1,3 @@
-using Microsoft.EntityFrameworkCore;
-
 public interface IPostRepository
 {
     Task<Post?> GetByIdAsync(int postId, bool includeRelations = false);
